@@ -13,6 +13,8 @@ ThisBuild / githubWorkflowJavaVersions := Seq(
   JavaSpec.corretto(java17),
   JavaSpec.corretto(java21)
 )
+ThisBuild / githubWorkflowBuildPreamble ++= nativeBrewInstallWorkflowSteps.value
+ThisBuild / nativeBrewInstallCond := Some("matrix.project == 'mcpScalaNative'")
 ThisBuild / githubWorkflowTargetBranches        := Seq("**")
 ThisBuild / githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v")))
 
@@ -40,6 +42,8 @@ lazy val server = crossProject(JVMPlatform, JSPlatform, NativePlatform)
       "co.fs2"        %%% "fs2-io"              % "3.12.0"
     )
   )
+  .nativeEnablePlugins(ScalaNativeBrewedConfigPlugin)
+  .nativeSettings(Test / nativeBrewFormulas += "s2n")
   .dependsOn(schema)
 
 lazy val client = crossProject(JVMPlatform, JSPlatform, NativePlatform)
