@@ -14,7 +14,7 @@ ThisBuild / githubWorkflowJavaVersions := Seq(
   JavaSpec.corretto(java21)
 )
 ThisBuild / githubWorkflowBuildPreamble ++= nativeBrewInstallWorkflowSteps.value
-ThisBuild / nativeBrewInstallCond := Some("matrix.project == 'mcpScalaNative'")
+ThisBuild / nativeBrewInstallCond               := Some("matrix.project == 'mcpScalaNative'")
 ThisBuild / githubWorkflowTargetBranches        := Seq("**")
 ThisBuild / githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v")))
 
@@ -37,9 +37,9 @@ lazy val server = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .module("server", "Project for MCP server")
   .settings(
     libraryDependencies ++= Seq(
-      "io.circe" %%% "circe-core"    % "0.14.8",
-      "co.fs2"        %%% "fs2-core"            % "3.12.0",
-      "co.fs2"        %%% "fs2-io"              % "3.12.0"
+      "org.typelevel" %%% "cats-effect" % "3.6.0",
+      "co.fs2"        %%% "fs2-core"    % "3.12.0",
+      "co.fs2"        %%% "fs2-io"      % "3.12.0"
     )
   )
   .nativeEnablePlugins(ScalaNativeBrewedConfigPlugin)
@@ -51,9 +51,9 @@ lazy val client = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .module("client", "Project for MCP client")
   .settings(
     libraryDependencies ++= Seq(
-      "org.typelevel" %%% "cats-effect"         % "3.6.0",
-      "co.fs2"        %%% "fs2-core"            % "3.12.0",
-      "co.fs2"        %%% "fs2-io"              % "3.12.0"
+      "org.typelevel" %%% "cats-effect" % "3.6.0",
+      "co.fs2"        %%% "fs2-core"    % "3.12.0",
+      "co.fs2"        %%% "fs2-io"      % "3.12.0"
     )
   )
   .dependsOn(schema)
