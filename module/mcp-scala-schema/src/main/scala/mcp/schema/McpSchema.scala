@@ -30,34 +30,34 @@ object McpSchema:
   // ---------------------------
 
   // Lifecycle Methods
-  val METHOD_INITIALIZE: String = "initialize"
+  val METHOD_INITIALIZE:               String = "initialize"
   val METHOD_NOTIFICATION_INITIALIZED: String = "notifications/initialized"
-  val METHOD_PING: String = "ping"
+  val METHOD_PING:                     String = "ping"
 
   // Tool Methods
-  val METHOD_TOOLS_LIST: String = "tools/list"
-  val METHOD_TOOLS_CALL: String = "tools/call"
+  val METHOD_TOOLS_LIST:                      String = "tools/list"
+  val METHOD_TOOLS_CALL:                      String = "tools/call"
   val METHOD_NOTIFICATION_TOOLS_LIST_CHANGED: String = "notifications/tools/list_changed"
 
   // Resources Methods
-  val METHOD_RESOURCES_LIST: String = "resources/list"
-  val METHOD_RESOURCES_READ: String = "resources/read"
+  val METHOD_RESOURCES_LIST:                      String = "resources/list"
+  val METHOD_RESOURCES_READ:                      String = "resources/read"
   val METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED: String = "notifications/resources/list_changed"
-  val METHOD_RESOURCES_TEMPLATES_LIST: String = "resources/templates/list"
-  val METHOD_RESOURCES_SUBSCRIBE: String = "resources/subscribe"
-  val METHOD_RESOURCES_UNSUBSCRIBE: String = "resources/unsubscribe"
+  val METHOD_RESOURCES_TEMPLATES_LIST:            String = "resources/templates/list"
+  val METHOD_RESOURCES_SUBSCRIBE:                 String = "resources/subscribe"
+  val METHOD_RESOURCES_UNSUBSCRIBE:               String = "resources/unsubscribe"
 
   // Prompt Methods
-  val METHOD_PROMPT_LIST: String = "prompts/list"
-  val METHOD_PROMPT_GET: String = "prompts/get"
+  val METHOD_PROMPT_LIST:                       String = "prompts/list"
+  val METHOD_PROMPT_GET:                        String = "prompts/get"
   val METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED: String = "notifications/prompts/list_changed"
 
   // Logging Methods
-  val METHOD_LOGGING_SET_LEVEL: String = "logging/setLevel"
+  val METHOD_LOGGING_SET_LEVEL:    String = "logging/setLevel"
   val METHOD_NOTIFICATION_MESSAGE: String = "notifications/message"
 
   // Roots Methods
-  val METHOD_ROOTS_LIST: String = "roots/list"
+  val METHOD_ROOTS_LIST:                      String = "roots/list"
   val METHOD_NOTIFICATION_ROOTS_LIST_CHANGED: String = "notifications/roots/list_changed"
 
   // Sampling Methods
@@ -95,7 +95,6 @@ object McpSchema:
      */
     val INTERNAL_ERROR: Int = -32603
 
-
   sealed trait JSONRPCMessage:
 
     def jsonrpc: String
@@ -107,32 +106,30 @@ object McpSchema:
         methodOpt <- cursor.get[Option[String]]("method")
         idCursor = cursor.downField("id")
         resultOpt <- cursor.get[Option[Json]]("result")
-        errorOpt <- cursor.get[Option[JSONRPCError]]("error")
+        errorOpt  <- cursor.get[Option[JSONRPCError]]("error")
         decoded <- (methodOpt, idCursor.focus.isDefined) match
-          case (Some(method), true) =>
-            cursor.as[JSONRPCRequest]
-          case (Some(method), false) =>
-            cursor.as[JSONRPCNotification]
-          case _ =>
-            if resultOpt.isDefined || errorOpt.isDefined then
-              cursor.as[JSONRPCResponse]
-            else 
-              Left(DecodingFailure("Invalid JSON-RPC message", cursor.history))
+                     case (Some(method), true) =>
+                       cursor.as[JSONRPCRequest]
+                     case (Some(method), false) =>
+                       cursor.as[JSONRPCNotification]
+                     case _ =>
+                       if resultOpt.isDefined || errorOpt.isDefined then cursor.as[JSONRPCResponse]
+                       else Left(DecodingFailure("Invalid JSON-RPC message", cursor.history))
       yield decoded
     }
 
     given Encoder[JSONRPCMessage] = Encoder.instance {
-      case request: JSONRPCRequest => request.asJson
+      case request: JSONRPCRequest           => request.asJson
       case notification: JSONRPCNotification => notification.asJson
-      case batch: JSONRPCBatch => batch.asJson
-      case response: JSONRPCResponse => response.asJson
+      case batch: JSONRPCBatch               => batch.asJson
+      case response: JSONRPCResponse         => response.asJson
     }
 
   final case class JSONRPCRequest(
     jsonrpc: String,
-    method: String,
-    id: JSONRPCRequest.Id,
-    params: Option[Json]
+    method:  String,
+    id:      JSONRPCRequest.Id,
+    params:  Option[Json]
   ) extends JSONRPCMessage
 
   object JSONRPCRequest:
@@ -169,28 +166,28 @@ object McpSchema:
     given Encoder[JSONRPCRequest] = Encoder.derived[JSONRPCRequest]
 
   final case class JSONRPCNotification(
-                                        jsonrpc: String,
-                                        method: String,
-                                        params: Option[Json]
-                                      ) extends JSONRPCMessage
+    jsonrpc: String,
+    method:  String,
+    params:  Option[Json]
+  ) extends JSONRPCMessage
 
   object JSONRPCNotification:
     given Decoder[JSONRPCNotification] = Decoder.derived[JSONRPCNotification]
     given Encoder[JSONRPCNotification] = Encoder.derived[JSONRPCNotification]
 
   final case class JSONRPCBatch(
-                                 jsonrpc: String,
-                               requests: List[JSONRPCMessage],
-                               ) extends JSONRPCMessage
+    jsonrpc:  String,
+    requests: List[JSONRPCMessage]
+  ) extends JSONRPCMessage
 
   object JSONRPCBatch:
     given Decoder[JSONRPCBatch] = Decoder.derived[JSONRPCBatch]
     given Encoder[JSONRPCBatch] = Encoder.derived[JSONRPCBatch]
 
   final case class JSONRPCError(
-    code: Int,
+    code:    Int,
     message: String,
-    data: Option[Json]
+    data:    Option[Json]
   )
 
   object JSONRPCError:
@@ -199,9 +196,9 @@ object McpSchema:
 
   final case class JSONRPCResponse(
     jsonrpc: String,
-    id: JSONRPCRequest.Id,
-    result: Option[Json],
-    error: Option[JSONRPCError]
+    id:      JSONRPCRequest.Id,
+    result:  Option[Json],
+    error:   Option[JSONRPCError]
   ) extends JSONRPCMessage
 
   object JSONRPCResponse:
@@ -210,14 +207,14 @@ object McpSchema:
     given Encoder[JSONRPCResponse] = Encoder.derived[JSONRPCResponse].mapJson(_.dropNullValues)
 
     def apply(
-               id: JSONRPCRequest.Id,
-               result: Option[Json],
-               error: Option[JSONRPCError]
-             ): JSONRPCResponse = JSONRPCResponse(JSONRPC_VERSION, id, result, error)
+      id:     JSONRPCRequest.Id,
+      result: Option[Json],
+      error:  Option[JSONRPCError]
+    ): JSONRPCResponse = JSONRPCResponse(JSONRPC_VERSION, id, result, error)
 
     def failure(id: JSONRPCRequest.Id, error: JSONRPCError): JSONRPCResponse = this.apply(id, None, Some(error))
-    def failure(error: JSONRPCError): JSONRPCResponse = this.failure(JSONRPCRequest.Id.NullId, error)
-    def success(id: JSONRPCRequest.Id, result: Json): JSONRPCResponse = this.apply(id, Some(result), None)
+    def failure(error: JSONRPCError):                    JSONRPCResponse = this.failure(JSONRPCRequest.Id.NullId, error)
+    def success(id:    JSONRPCRequest.Id, result: Json): JSONRPCResponse = this.apply(id, Some(result), None)
 
   sealed trait Request
 
@@ -265,10 +262,10 @@ object McpSchema:
    *
    */
   final case class ClientCapabilities(
-                                       experimental: Option[Map[String, Json]],
-                                        roots: Option[RootCapabilities],
-                                       sampling: Option[Sampling]
-                                     )
+    experimental: Option[Map[String, Json]],
+    roots:        Option[RootCapabilities],
+    sampling:     Option[Sampling]
+  )
 
   object ClientCapabilities:
     given Decoder[ClientCapabilities] = Decoder.derived[ClientCapabilities]
@@ -285,9 +282,9 @@ object McpSchema:
     given Encoder[PromptCapabilities] = Encoder.derived[PromptCapabilities]
 
   final case class ResourceCapabilities(
-                                       subscribe: Boolean,
-                                       listChanged: Boolean,
-                                       )
+    subscribe:   Boolean,
+    listChanged: Boolean
+  )
   object ResourceCapabilities:
     given Decoder[ResourceCapabilities] = Decoder.derived[ResourceCapabilities]
     given Encoder[ResourceCapabilities] = Encoder.derived[ResourceCapabilities]
@@ -298,20 +295,20 @@ object McpSchema:
     given Encoder[ToolCapabilities] = Encoder.derived[ToolCapabilities]
 
   final case class ServerCapabilities(
-                                        //experimental: Option[Map[String, Json]],
-                                        //logging: LoggingCapabilities,
-                                        //prompt: PromptCapabilities,
-                                        //resources: ResourceCapabilities,
-                                        tools: ToolCapabilities,
-                                     )
+    // experimental: Option[Map[String, Json]],
+    // logging: LoggingCapabilities,
+    // prompt: PromptCapabilities,
+    // resources: ResourceCapabilities,
+    tools: ToolCapabilities
+  )
   object ServerCapabilities:
     given Decoder[ServerCapabilities] = Decoder.derived[ServerCapabilities]
     given Encoder[ServerCapabilities] = Encoder.derived[ServerCapabilities]
 
   final case class Implementation(
-    name: String,
-    version: String,
-                                 )
+    name:    String,
+    version: String
+  )
   object Implementation:
     given Decoder[Implementation] = Decoder.derived[Implementation]
     given Encoder[Implementation] = Encoder.derived[Implementation]
@@ -320,11 +317,11 @@ object McpSchema:
     case USER, ASSISTANT
   object Role:
     given Decoder[Role] = Decoder[String].map {
-      case "user" => Role.USER
+      case "user"      => Role.USER
       case "assistant" => Role.ASSISTANT
     }
     given Encoder[Role] = Encoder[String].contramap {
-      case Role.USER => "user"
+      case Role.USER      => "user"
       case Role.ASSISTANT => "assistant"
     }
 
@@ -332,20 +329,20 @@ object McpSchema:
   // Initialization
   // ---------------------------
   final case class InitializeRequest(
-                                      protocolVersion: String,
-                                      capabilities: ClientCapabilities,
-                                      clientInfo: Implementation,
-                                    ) extends Request
+    protocolVersion: String,
+    capabilities:    ClientCapabilities,
+    clientInfo:      Implementation
+  ) extends Request
   object InitializeRequest:
     given Decoder[InitializeRequest] = Decoder.derived[InitializeRequest]
     given Encoder[InitializeRequest] = Encoder.derived[InitializeRequest]
 
   final case class InitializeResult(
-                                     protocolVersion: String,
-                                     capabilities: ServerCapabilities,
-                                   serverInfo: Implementation,
-                                     instructions: Option[String]
-                                   )
+    protocolVersion: String,
+    capabilities:    ServerCapabilities,
+    serverInfo:      Implementation,
+    instructions:    Option[String]
+  )
   object InitializeResult:
     given Decoder[InitializeResult] = Decoder.derived[InitializeResult]
     given Encoder[InitializeResult] = Encoder.derived[InitializeResult]
@@ -363,9 +360,9 @@ object McpSchema:
    *                 optional. It is a number between 0 and 1.
    */
   final case class Annotations(
-                              audience: List[Role],
-                              priority: Double
-                              )
+    audience: List[Role],
+    priority: Double
+  )
   object Annotations:
     given Decoder[Annotations] = Decoder.derived[Annotations]
     given Encoder[Annotations] = Encoder.derived[Annotations]
@@ -394,12 +391,12 @@ object McpSchema:
    *                    annotations to inform how objects are used or displayed.
    */
   final case class Resource(
-                           uri: String,
-                           name: String,
-                           description: String,
-                           mimeType: String,
-                            annotations: Annotations,
-                           ) extends Annotated
+    uri:         String,
+    name:        String,
+    description: String,
+    mimeType:    String,
+    annotations: Annotations
+  ) extends Annotated
 
   object Resource:
     given Decoder[Resource] = Decoder.derived[Resource]
@@ -422,21 +419,21 @@ object McpSchema:
    * @see <a href="https://datatracker.ietf.org/doc/html/rfc6570">RFC 6570</a>
    */
   final case class ResourceTemplate(
-                                   uriTemplate: String,
-                                    name: String,
-                                    description: String,
-                                    mimeType: String,
-                                    annotations: Annotations,
-                                   ) extends Annotated
+    uriTemplate: String,
+    name:        String,
+    description: String,
+    mimeType:    String,
+    annotations: Annotations
+  ) extends Annotated
 
   object ResourceTemplate:
     given Decoder[ResourceTemplate] = Decoder.derived[ResourceTemplate]
     given Encoder[ResourceTemplate] = Encoder.derived[ResourceTemplate]
 
   final case class ListResourcesResult(
-    resources: List[Resource],
+    resources:  List[Resource],
     nextCursor: String
-                                      )
+  )
   object ListResourcesResult:
     given Decoder[ListResourcesResult] = Decoder.derived[ListResourcesResult]
     given Encoder[ListResourcesResult] = Encoder.derived[ListResourcesResult]
@@ -467,7 +464,7 @@ object McpSchema:
       c.get[String]("type").flatMap {
         case "text" => c.as[TextResourceContents]
         case "blob" => c.as[BlobResourceContents]
-        case _ => Left(DecodingFailure("Unknown resource type", c.history))
+        case _      => Left(DecodingFailure("Unknown resource type", c.history))
       }
     }
 
@@ -475,7 +472,7 @@ object McpSchema:
       case text: TextResourceContents => text.asJson
       case blob: BlobResourceContents => blob.asJson
     }
-  
+
   /**
    * Text contents of a resource.
    *
@@ -485,9 +482,9 @@ object McpSchema:
    *                 actually be represented as text (not binary data).
    */
   final case class TextResourceContents(
-    uri: String,
+    uri:      String,
     mimeType: String,
-    text: String,
+    text:     String
   ) extends ResourceContents
   object TextResourceContents:
     given Decoder[TextResourceContents] = Decoder.derived[TextResourceContents]
@@ -503,10 +500,10 @@ object McpSchema:
    *                 (not text).
    */
   final case class BlobResourceContents(
-    uri: String,
+    uri:      String,
     mimeType: String,
-    blob: String,
-                                       ) extends ResourceContents
+    blob:     String
+  ) extends ResourceContents
   object BlobResourceContents:
     given Decoder[BlobResourceContents] = Decoder.derived[BlobResourceContents]
     given Encoder[BlobResourceContents] = Encoder.derived[BlobResourceContents]
@@ -541,10 +538,10 @@ object McpSchema:
    * @param required    Whether this argument must be provided.
    */
   final case class PromptArgument(
-    name: String,
+    name:        String,
     description: String,
-    required: Boolean,
-                                 )
+    required:    Boolean
+  )
   object PromptArgument:
     given Decoder[PromptArgument] = Decoder.derived[PromptArgument]
     given Encoder[PromptArgument] = Encoder.derived[PromptArgument]
@@ -560,9 +557,9 @@ object McpSchema:
    * @param arguments   A list of arguments to use for templating the prompt.
    */
   final case class Prompt(
-    name: String,
+    name:        String,
     description: String,
-    arguments: List[PromptArgument],
+    arguments:   List[PromptArgument]
   )
   object Prompt:
     given Decoder[Prompt] = Decoder.derived[Prompt]
@@ -574,49 +571,51 @@ object McpSchema:
   sealed trait Content:
 
     def `type`: String
-    
+
   object Content:
     given Decoder[Content] = Decoder.instance { c =>
       c.get[String]("type").flatMap {
-        case "text" => c.as[TextContent]
-        case "image" => c.as[ImageContent]
+        case "text"     => c.as[TextContent]
+        case "image"    => c.as[ImageContent]
         case "resource" => c.as[EmbeddedResource]
-        case _ => Left(DecodingFailure("Unknown content type", c.history))
+        case _          => Left(DecodingFailure("Unknown content type", c.history))
       }
     }
 
     given Encoder[Content] = Encoder.instance {
-      case text: TextContent => text.asJson
-      case image: ImageContent => image.asJson
+      case text: TextContent          => text.asJson
+      case image: ImageContent        => image.asJson
       case resource: EmbeddedResource => resource.asJson
     }
 
     def text(text: String): TextContent = TextContent(None, None, text)
 
   final case class TextContent(
-                              audience: Option[List[Role]],
-                              priority: Option[Double],
-    text: String,
+    audience: Option[List[Role]],
+    priority: Option[Double],
+    text:     String
   ) extends Content:
     override def `type`: String = "text"
 
   object TextContent:
     given Decoder[TextContent] = Decoder.derived[TextContent]
     given Encoder[TextContent] = Encoder.instance { txt =>
-      Json.obj(
-        "type" -> Json.fromString(txt.`type`),
-        "audience" -> txt.audience.asJson,
-        "priority" -> txt.priority.asJson,
-        "text" -> Json.fromString(txt.text)
-      ).dropNullValues
+      Json
+        .obj(
+          "type"     -> Json.fromString(txt.`type`),
+          "audience" -> txt.audience.asJson,
+          "priority" -> txt.priority.asJson,
+          "text"     -> Json.fromString(txt.text)
+        )
+        .dropNullValues
     }
 
   final case class ImageContent(
-                              audience: List[Role],
-                              priority: Double,
-                              data: String,
-                              mimeType: String,
-                               ) extends Content:
+    audience: List[Role],
+    priority: Double,
+    data:     String,
+    mimeType: String
+  ) extends Content:
     override def `type`: String = "image"
 
   object ImageContent:
@@ -624,10 +623,10 @@ object McpSchema:
     given Encoder[ImageContent] = Encoder.derived[ImageContent]
 
   final case class EmbeddedResource(
-                                   audience: List[Role],
-                                    priority: Double,
-                                   resource: ResourceContents,
-                                   ) extends Content:
+    audience: List[Role],
+    priority: Double,
+    resource: ResourceContents
+  ) extends Content:
     override def `type`: String = "resource"
 
   object EmbeddedResource:
@@ -644,9 +643,9 @@ object McpSchema:
    * @param content The content of the message of type [[Content]].
    */
   final case class PromptMessage(
-    role: Role,
-    content: Content,
-                                )
+    role:    Role,
+    content: Content
+  )
   object PromptMessage:
     given Decoder[PromptMessage] = Decoder.derived[PromptMessage]
     given Encoder[PromptMessage] = Encoder.derived[PromptMessage]
@@ -659,9 +658,9 @@ object McpSchema:
    *                   are more prompts available.
    */
   final case class ListPromptsResult(
-    prompts: List[Prompt],
+    prompts:    List[Prompt],
     nextCursor: String
-                                    )
+  )
   object ListPromptsResult:
     given Decoder[ListPromptsResult] = Decoder.derived[ListPromptsResult]
     given Encoder[ListPromptsResult] = Encoder.derived[ListPromptsResult]
@@ -673,19 +672,19 @@ object McpSchema:
    * @param messages    A list of messages to display as part of the prompt.
    */
   final case class GetPromptRequest(
-                                   description: String,
-                                   messages: List[PromptMessage],
-                                   )
+    description: String,
+    messages:    List[PromptMessage]
+  )
   object GetPromptRequest:
     given Decoder[GetPromptRequest] = Decoder.derived[GetPromptRequest]
     given Encoder[GetPromptRequest] = Encoder.derived[GetPromptRequest]
 
   final case class JsonSchema(
-                             `type`: String,
-                              properties: Map[String, Json],
-                              required: List[String],
-                              additionalProperties: Boolean,
-                             )
+    `type`:               String,
+    properties:           Map[String, Json],
+    required:             List[String],
+    additionalProperties: Boolean
+  )
   object JsonSchema:
     given Decoder[JsonSchema] = Decoder.derived[JsonSchema]
     given Encoder[JsonSchema] = Encoder.derived[JsonSchema]
@@ -699,14 +698,14 @@ object McpSchema:
 
   object ToolSchema:
     case class Static(
-      name: String,
+      name:        String,
       description: String,
       inputSchema: JsonSchema
-                     ) extends ToolSchema
+    ) extends ToolSchema
 
     given Decoder[ToolSchema] = Decoder.instance { c =>
       for {
-        name <- c.get[String]("name")
+        name        <- c.get[String]("name")
         description <- c.get[String]("description")
         inputSchema <- c.get[JsonSchema]("inputSchema")
       } yield Static(name, description, inputSchema)
@@ -714,7 +713,7 @@ object McpSchema:
 
     given Encoder[ToolSchema] = Encoder.instance { tool =>
       Json.obj(
-        "name" -> Json.fromString(tool.name),
+        "name"        -> Json.fromString(tool.name),
         "description" -> Json.fromString(tool.description),
         "inputSchema" -> tool.inputSchema.asJson
       )
@@ -731,11 +730,11 @@ object McpSchema:
    *                    used by clients to improve the LLM's understanding of available tools.
    */
   final case class Tool[F[_], T: Decoder: Encoder](
-                       name: String,
-                        description: String,
-                       inputSchema: JsonSchema,
-                       execute: T => F[CallToolResult]
-                       ) extends ToolSchema:
+    name:        String,
+    description: String,
+    inputSchema: JsonSchema,
+    execute:     T => F[CallToolResult]
+  ) extends ToolSchema:
 
     private[mcp] def schema: ToolSchema = ToolSchema.Static(
       name,
@@ -757,9 +756,9 @@ object McpSchema:
    *                   are more tools available.
    */
   final case class ListToolsResult(
-    tools: List[ToolSchema],
+    tools:      List[ToolSchema],
     nextCursor: Option[String]
-                                  )
+  )
   object ListToolsResult:
     given Decoder[ListToolsResult] = Decoder.derived[ListToolsResult]
     given Encoder[ListToolsResult] = Encoder.derived[ListToolsResult].mapJson(_.dropNullValues)
@@ -773,9 +772,9 @@ object McpSchema:
    *                  input schema.
    */
   final case class CallToolRequest(
-    name: String,
-    arguments: Json,
-                                  ) extends Request
+    name:      String,
+    arguments: Json
+  ) extends Request
   object CallToolRequest:
     given Decoder[CallToolRequest] = Decoder.derived[CallToolRequest]
     given Encoder[CallToolRequest] = Encoder.derived[CallToolRequest]
@@ -789,9 +788,9 @@ object McpSchema:
    *                If false or absent, indicates successful execution.
    */
   final case class CallToolResult(
-                                 content: List[Content],
-                                 isError: Boolean,
-                                 )
+    content: List[Content],
+    isError: Boolean
+  )
   object CallToolResult:
     given Decoder[CallToolResult] = Decoder.derived[CallToolResult]
     given Encoder[CallToolResult] = Encoder.derived[CallToolResult]
@@ -810,19 +809,19 @@ object McpSchema:
   // Sampling Interfaces
   // ---------------------------
   final case class ModelPreferences(
-                                   hints: List[ModelHint],
-                                   costPriority: Double,
-                                   speedPriority: Double,
-                                   intelligencePriority: Double,
-                                   )
+    hints:                List[ModelHint],
+    costPriority:         Double,
+    speedPriority:        Double,
+    intelligencePriority: Double
+  )
   object ModelPreferences:
     given Decoder[ModelPreferences] = Decoder.derived[ModelPreferences]
     given Encoder[ModelPreferences] = Encoder.derived[ModelPreferences]
 
   final case class SamplingMessage(
-    role: Role,
-    content: Content,
-                                  )
+    role:    Role,
+    content: Content
+  )
   object SamplingMessage:
     given Decoder[SamplingMessage] = Decoder.derived[SamplingMessage]
     given Encoder[SamplingMessage] = Encoder.derived[SamplingMessage]
@@ -831,27 +830,26 @@ object McpSchema:
     case NONE, THIS_SERVER, ALL_SERVERS
   object ContextInclusionStrategy:
     given Decoder[ContextInclusionStrategy] = Decoder[String].map {
-      case "none" => ContextInclusionStrategy.NONE
+      case "none"       => ContextInclusionStrategy.NONE
       case "thisServer" => ContextInclusionStrategy.THIS_SERVER
       case "allServers" => ContextInclusionStrategy.ALL_SERVERS
     }
     given Encoder[ContextInclusionStrategy] = Encoder[String].contramap {
-      case ContextInclusionStrategy.NONE => "none"
+      case ContextInclusionStrategy.NONE        => "none"
       case ContextInclusionStrategy.THIS_SERVER => "thisServer"
       case ContextInclusionStrategy.ALL_SERVERS => "allServers"
     }
 
-
   final case class CreateMessageRequest(
-                                       messages: List[SamplingMessage],
-                                        modelPreferences: ModelPreferences,
-                                       systemPrompt: Option[String],
-                                       includeContext: ContextInclusionStrategy,
-                                       temperature: Double,
-                                       maxTokens: Int,
-                                       stopSequences: List[String],
-                                       metadata: Map[String, Json],
-                                       ) extends Request
+    messages:         List[SamplingMessage],
+    modelPreferences: ModelPreferences,
+    systemPrompt:     Option[String],
+    includeContext:   ContextInclusionStrategy,
+    temperature:      Double,
+    maxTokens:        Int,
+    stopSequences:    List[String],
+    metadata:         Map[String, Json]
+  ) extends Request
   object CreateMessageRequest:
     given Decoder[CreateMessageRequest] = Decoder.derived[CreateMessageRequest]
     given Encoder[CreateMessageRequest] = Encoder.derived[CreateMessageRequest]
@@ -860,22 +858,22 @@ object McpSchema:
     case END_TURN, STOP_SEQUENCE, MAX_TOKENS
   object StopReason:
     given Decoder[StopReason] = Decoder[String].map {
-      case "endTurn" => StopReason.END_TURN
+      case "endTurn"      => StopReason.END_TURN
       case "stopSequence" => StopReason.STOP_SEQUENCE
-      case "maxTokens" => StopReason.MAX_TOKENS
+      case "maxTokens"    => StopReason.MAX_TOKENS
     }
     given Encoder[StopReason] = Encoder[String].contramap {
-      case StopReason.END_TURN => "endTurn"
+      case StopReason.END_TURN      => "endTurn"
       case StopReason.STOP_SEQUENCE => "stopSequence"
-      case StopReason.MAX_TOKENS => "maxTokens"
+      case StopReason.MAX_TOKENS    => "maxTokens"
     }
 
   final case class CreateMessageResult(
-                                      role: Role,
-                                      content: Content,
-                                      model: String,
-                                      stopReason: StopReason
-                                      )
+    role:       Role,
+    content:    Content,
+    model:      String,
+    stopReason: StopReason
+  )
   object CreateMessageResult:
     given Decoder[CreateMessageResult] = Decoder.derived[CreateMessageResult]
     given Encoder[CreateMessageResult] = Encoder.derived[CreateMessageResult]
@@ -895,21 +893,21 @@ object McpSchema:
   // ---------------------------
   final case class ProgressNotification(
     progressToken: String,
-    progress: Double,
-    total: Double,
-                                       )
+    progress:      Double,
+    total:         Double
+  )
   object ProgressNotification:
     given Decoder[ProgressNotification] = Decoder.derived[ProgressNotification]
     given Encoder[ProgressNotification] = Encoder.derived[ProgressNotification]
 
   enum LoggingLevel(val code: Int):
-    case DEBUG extends LoggingLevel(0)
-    case INFO extends LoggingLevel(1)
-    case NOTICE extends LoggingLevel(2)
-    case WARNING extends LoggingLevel(3)
-    case ERROR extends LoggingLevel(4)
-    case CRITICAL extends LoggingLevel(5)
-    case ALERT extends LoggingLevel(6)
+    case DEBUG     extends LoggingLevel(0)
+    case INFO      extends LoggingLevel(1)
+    case NOTICE    extends LoggingLevel(2)
+    case WARNING   extends LoggingLevel(3)
+    case ERROR     extends LoggingLevel(4)
+    case CRITICAL  extends LoggingLevel(5)
+    case ALERT     extends LoggingLevel(6)
     case EMERGENCY extends LoggingLevel(7)
   object LoggingLevel:
     given Decoder[LoggingLevel] = Decoder[Int].map {
@@ -935,10 +933,10 @@ object McpSchema:
    * @param data   JSON-serializable logging data.
    */
   final case class LoggingMessageNotification(
-                                             level: LoggingLevel,
-                                             logger: String,
-                                              data: String,
-                                             )
+    level:  LoggingLevel,
+    logger: String,
+    data:   String
+  )
   object LoggingMessageNotification:
     given Decoder[LoggingMessageNotification] = Decoder.derived[LoggingMessageNotification]
     given Encoder[LoggingMessageNotification] = Encoder.derived[LoggingMessageNotification]
@@ -946,41 +944,41 @@ object McpSchema:
   sealed trait PromptOrResourceReference:
 
     def `type`: String
-    
+
   object PromptOrResourceReference:
     given Decoder[PromptOrResourceReference] = Decoder.instance { c =>
       c.get[String]("type").flatMap {
-        case "prompt" => c.as[PromptReference]
+        case "prompt"   => c.as[PromptReference]
         case "resource" => c.as[ResourceReference]
-        case _ => Left(DecodingFailure("Unknown reference type", c.history))
+        case _          => Left(DecodingFailure("Unknown reference type", c.history))
       }
     }
 
     given Encoder[PromptOrResourceReference] = Encoder.instance {
-      case prompt: PromptReference => prompt.asJson
+      case prompt: PromptReference     => prompt.asJson
       case resource: ResourceReference => resource.asJson
     }
 
   final case class PromptReference(
-                                  `type`: String,
-                                  uri: String,
-                                  ) extends PromptOrResourceReference
+    `type`: String,
+    uri:    String
+  ) extends PromptOrResourceReference
   object PromptReference:
     given Decoder[PromptReference] = Decoder.derived[PromptReference]
     given Encoder[PromptReference] = Encoder.derived[PromptReference]
 
   final case class ResourceReference(
-                                    `type`: String,
-                                    uri: String,
-                                    ) extends PromptOrResourceReference
+    `type`: String,
+    uri:    String
+  ) extends PromptOrResourceReference
   object ResourceReference:
     given Decoder[ResourceReference] = Decoder.derived[ResourceReference]
     given Encoder[ResourceReference] = Encoder.derived[ResourceReference]
 
   final case class CompleteArgument(
-                                    name: String,
-                                    value: String,
-                                   )
+    name:  String,
+    value: String
+  )
   object CompleteArgument:
     given Decoder[CompleteArgument] = Decoder.derived[CompleteArgument]
     given Encoder[CompleteArgument] = Encoder.derived[CompleteArgument]
@@ -989,25 +987,25 @@ object McpSchema:
   // Autocomplete
   // ---------------------------
   final case class CompleteRequest(
-                                    ref: PromptOrResourceReference,
-                                    argument: CompleteArgument
-                                  ) extends Request
+    ref:      PromptOrResourceReference,
+    argument: CompleteArgument
+  ) extends Request
   object CompleteRequest:
     given Decoder[CompleteRequest] = Decoder.derived[CompleteRequest]
     given Encoder[CompleteRequest] = Encoder.derived[CompleteRequest]
 
   final case class CompleteCompletion(
-                                     values: List[String],
-                                     total: Int,
-                                     hasMore: Boolean,
-                                     )
+    values:  List[String],
+    total:   Int,
+    hasMore: Boolean
+  )
   object CompleteCompletion:
     given Decoder[CompleteCompletion] = Decoder.derived[CompleteCompletion]
     given Encoder[CompleteCompletion] = Encoder.derived[CompleteCompletion]
 
   final case class CompleteResult(
-                                 completion: CompleteCompletion
-                                 )
+    completion: CompleteCompletion
+  )
   object CompleteResult:
     given Decoder[CompleteResult] = Decoder.derived[CompleteResult]
     given Encoder[CompleteResult] = Encoder.derived[CompleteResult]
@@ -1026,9 +1024,9 @@ object McpSchema:
    *             for referencing the root in other parts of the application.
    */
   final case class Root(
-    uri: String,
-    name: Option[String],
-                       )
+    uri:  String,
+    name: Option[String]
+  )
   object Root:
     given Decoder[Root] = Decoder.derived[Root]
     given Encoder[Root] = Encoder.derived[Root]
@@ -1043,7 +1041,7 @@ object McpSchema:
    */
   final case class ListRootsResult(
     roots: List[Root]
-                                  )
+  )
   object ListRootsResult:
     given Decoder[ListRootsResult] = Decoder.derived[ListRootsResult]
     given Encoder[ListRootsResult] = Encoder.derived[ListRootsResult]

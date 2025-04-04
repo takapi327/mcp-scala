@@ -16,13 +16,13 @@ package mcp.schema
  *   error message
  */
 class McpError(message: String) extends RuntimeException:
-  
+
   override def getMessage: String = message
 
 object McpError:
-  
+
   def apply(jsonRpcError: McpSchema.JSONRPCError): McpError =
     new McpError(jsonRpcError.message)
-    
+
   def apply(message: String): McpError =
     new McpError(message)
