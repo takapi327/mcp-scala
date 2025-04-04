@@ -1,0 +1,127 @@
+/**
+ * Copyright (c) 2023-2024 by Takahiko Tominaga
+ * This software is licensed under the MIT License (MIT).
+ * For more information see LICENSE or https://opensource.org/licenses/MIT
+ */
+
+package mcp.server
+
+import cats.syntax.all.*
+
+import io.circe.*
+import io.circe.syntax.*
+
+import cats.effect.Async
+
+import mcp.schema.{McpSchema, McpError}
+
+trait RequestHandler[F[_]]:
+  
+  def handle(request: Json): F[Either[Throwable, Json]]
+
+object RequestHandler:
+  
+  class Provider[F[_]: Async](
+    serverInfo: McpSchema.Implementation,
+    capabilities: McpSchema.ServerCapabilities,
+    tools: List[McpSchema.Tool[F, ?]]
+  ):
+    
+    def handlers: Map[String, RequestHandler[F]] =
+      Map(
+        // Lifecycle Methods
+        McpSchema.METHOD_INITIALIZE -> Initialize[F](serverInfo, capabilities),
+        //McpSchema.METHOD_NOTIFICATION_INITIALIZED -> ???,
+        McpSchema.METHOD_PING -> Ping[F](),
+        // Tool Methods
+        McpSchema.METHOD_TOOLS_LIST -> ListTools[F](serverInfo, capabilities, tools),
+        McpSchema.METHOD_TOOLS_CALL -> CallTools[F](serverInfo, capabilities, tools),
+        //McpSchema.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED -> ???,
+        // Resources Methods
+        //McpSchema.METHOD_RESOURCES_LIST -> ???,
+        //McpSchema.METHOD_RESOURCES_READ -> ???,
+        //McpSchema.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED -> ???,
+        //McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ???,
+        //McpSchema.METHOD_RESOURCES_SUBSCRIBE -> ???,
+        //McpSchema.METHOD_RESOURCES_UNSUBSCRIBE -> ???,
+        // Prompt Methods
+        //McpSchema.METHOD_PROMPT_LIST -> ???,
+        //McpSchema.METHOD_PROMPT_GET -> ???,
+        //McpSchema.METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED -> ???,
+        // Logging Methods
+        //McpSchema.METHOD_LOGGING_SET_LEVEL -> ???,
+        //McpSchema.METHOD_NOTIFICATION_MESSAGE -> ???,
+        // Roots Methods
+        //McpSchema.METHOD_ROOTS_LIST -> ???,
+        //McpSchema.METHOD_NOTIFICATION_ROOTS_LIST_CHANGED -> ???,
+        // Sampling Methods
+        //McpSchema.METHOD_SAMPLING_CREATE_MESSAGE -> ???,
+      )
+  
+  final case class Initialize[F[_]: Async](
+                                           serverInfo: McpSchema.Implementation,
+                                           capabilities: McpSchema.ServerCapabilities,
+                                         ) extends RequestHandler[F]:
+
+    override def handle(request: Json): F[Either[Throwable, Json]] =
+      request.as[McpSchema.InitializeRequest] match
+        case Left(error) => Async[F].pure(Left(error))
+        case Right(initializeRequest) =>
+          val response = McpSchema.InitializeResult(
+            initializeRequest.protocolVersion,
+            capabilities,
+            serverInfo,
+            Some("This server is still under development"),
+          )
+          Async[F].pure(Right(response.asJson))
+
+  final case class Ping[F[_]: Async]() extends RequestHandler[F]:
+
+    override def handle(request: Json): F[Either[Throwable, Json]] =
+      Async[F].pure(Right(Json.obj()))
+
+  /**
+   * 
+   * @see https://github.com/modelcontextprotocol/java-sdk/blob/79ec5b5ed1cc1a7abf2edda313a81875bd75ad86/mcp/src/main/java/io/modelcontextprotocol/server/McpAsyncServer.java#L452
+   * 
+   * @param serverInfo
+   * @param capabilities
+   * @param tools
+   * @param sync$F$0
+   * @tparam F
+   */
+  final case class ListTools[F[_]: Async](
+                                          serverInfo: McpSchema.Implementation,
+                                          capabilities: McpSchema.ServerCapabilities,
+                                          tools: List[McpSchema.Tool[F, ?]]
+                                        ) extends RequestHandler[F]:
+
+    override def handle(request: Json): F[Either[Throwable, Json]] =
+      val response = McpSchema.ListToolsResult(tools, None)
+      Async[F].pure(Right(response.asJson))
+
+  /**
+   * @see https://github.com/modelcontextprotocol/java-sdk/blob/79ec5b5ed1cc1a7abf2edda313a81875bd75ad86/mcp/src/main/java/io/modelcontextprotocol/server/McpAsyncServer.java#L460
+   *      
+   * @param serverInfo
+   * @param capabilities
+   * @param tools
+   * @param sync$F$0
+   * @tparam F
+   */
+  final case class CallTools[F[_]: Async](
+                                          serverInfo: McpSchema.Implementation,
+                                          capabilities: McpSchema.ServerCapabilities,
+                                          tools: List[McpSchema.Tool[F, ?]]
+                                        ) extends RequestHandler[F]:
+
+    override def handle(request: Json): F[Either[Throwable, Json]] =
+      request.as[McpSchema.CallToolRequest] match
+        case Left(error) => Async[F].pure(Left(error))
+        case Right(callToolRequest) =>
+          tools.find(_.name == callToolRequest.name) match
+            case None => Async[F].pure(Left(McpError(s"Tool not found: ${callToolRequest.name}")))
+            case Some(tool) => tool.decode(callToolRequest.arguments) match
+              case Left(error) => Async[F].pure(Left(error))
+              case Right(value) => tool.execute(value).map(v => Right(v.asJson))
+  

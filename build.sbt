@@ -15,7 +15,6 @@ ThisBuild / githubWorkflowJavaVersions := Seq(
 )
 ThisBuild / githubWorkflowTargetBranches        := Seq("**")
 ThisBuild / githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v")))
-ThisBuild / tlSitePublishBranch                 := None
 
 ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
 sonatypeRepository                 := "https://s01.oss.sonatype.org/service/local"
@@ -38,10 +37,7 @@ lazy val server = crossProject(JVMPlatform, JSPlatform, NativePlatform)
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-effect"         % "3.6.0",
       "co.fs2"        %%% "fs2-core"            % "3.12.0",
-      "co.fs2"        %%% "fs2-io"              % "3.12.0",
-      "org.http4s"    %%% "http4s-ember-client" % "0.23.30",
-      "org.http4s"    %%% "http4s-ember-server" % "0.23.30",
-      "org.http4s"    %%% "http4s-dsl"          % "0.23.30"
+      "co.fs2"        %%% "fs2-io"              % "3.12.0"
     )
   )
   .dependsOn(schema)
@@ -53,10 +49,7 @@ lazy val client = crossProject(JVMPlatform, JSPlatform, NativePlatform)
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-effect"         % "3.6.0",
       "co.fs2"        %%% "fs2-core"            % "3.12.0",
-      "co.fs2"        %%% "fs2-io"              % "3.12.0",
-      "org.http4s"    %%% "http4s-ember-client" % "0.23.30",
-      "org.http4s"    %%% "http4s-ember-server" % "0.23.30",
-      "org.http4s"    %%% "http4s-dsl"          % "0.23.30"
+      "co.fs2"        %%% "fs2-io"              % "3.12.0"
     )
   )
   .dependsOn(schema)
