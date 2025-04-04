@@ -6,16 +6,16 @@
 
 package mcp.server
 
-import io.circe.*
-
 import cats.effect.*
+
+import io.circe.*
 
 import munit.*
 
 import mcp.schema.McpSchema
 
 class StdioTest extends CatsEffectSuite:
-  
+
   case class RandomNumber(min: Int, max: Int)
   object RandomNumber:
     given Encoder[RandomNumber] = Encoder.derived
@@ -33,17 +33,17 @@ class StdioTest extends CatsEffectSuite:
       List("min", "max"),
       false
     ),
-    request => IO.pure {
-      val random = scala.util.Random.between(request.min, request.max)
-      val contents = List(McpSchema.Content.text(random.toString))
-      McpSchema.CallToolResult.success(contents)
-    }
+    request =>
+      IO.pure {
+        val random   = scala.util.Random.between(request.min, request.max)
+        val contents = List(McpSchema.Content.text(random.toString))
+        McpSchema.CallToolResult.success(contents)
+      }
   )
-  
+
   test("test") {
-    //val json = RandomNumber(1, 10).asJson
-    //val server = McpServer[IO]("MCP Server", "0.1.0")
+    // val json = RandomNumber(1, 10).asJson
+    // val server = McpServer[IO]("MCP Server", "0.1.0")
     //  .addTool(tool)
     //  .start("stdio")
   }
-  
