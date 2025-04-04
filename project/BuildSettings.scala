@@ -25,17 +25,6 @@ object BuildSettings {
     "-Wvalue-discard"
   )
 
-  /**
-   * Set up a scripted framework to test the plugin.
-   */
-  def scriptedSettings: Seq[Setting[?]] = Seq(
-    scriptedLaunchOpts := {
-      scriptedLaunchOpts.value ++
-        Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
-    },
-    scriptedBufferLog := false
-  )
-
   val customCommentStyle: CommentStyle =
     CommentStyle(
       new CommentBlockCreator("/**", " *", " */"),
@@ -54,7 +43,7 @@ object BuildSettings {
     headerMappings := headerMappings.value + (HeaderFileType.scala -> customCommentStyle),
     headerLicense := Some(
       HeaderLicense.Custom(
-        """|Copyright (c) 2023-2024 by Takahiko Tominaga
+        """|Copyright (c) 2025-2026 by Takahiko Tominaga
          |This software is licensed under the MIT License (MIT).
          |For more information see LICENSE or https://opensource.org/licenses/MIT
          |""".stripMargin
