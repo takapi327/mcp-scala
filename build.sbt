@@ -37,7 +37,7 @@ lazy val server = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .module("server", "Project for MCP server")
   .settings(
     libraryDependencies ++= Seq(
-      "org.typelevel" %%% "cats-effect"         % "3.6.0",
+      "io.circe" %%% "circe-core"    % "0.14.8",
       "co.fs2"        %%% "fs2-core"            % "3.12.0",
       "co.fs2"        %%% "fs2-io"              % "3.12.0"
     )

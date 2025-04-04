@@ -10,12 +10,12 @@ import cats.syntax.all.*
 
 import cats.effect.*
 
-import fs2.*
-import fs2.io.*
-
 import io.circe.*
 import io.circe.parser.*
 import io.circe.syntax.*
+
+import fs2.{ text, Stream }
+import fs2.io.{ file, stdin, stdout }
 
 import mcp.schema.McpSchema
 
