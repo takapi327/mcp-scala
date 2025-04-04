@@ -22,10 +22,6 @@ trait McpServer[F[_]]:
 
 object McpServer:
 
-  case class ToolSpecification[F[_]](tool: McpSchema.Tool[F, ?]):
-
-    def call(input: McpSchema.JsonSchema): McpSchema.CallToolResult = ???
-
   case class Imp[F[_]: Async](
     serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
