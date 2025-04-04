@@ -1,12 +1,6 @@
-/**
- *  This file is part of the ldbc.
- *  For the full copyright and license information,
- *  please view the LICENSE file that was distributed with this source code.
- */
 
 import sbt.*
 import sbt.Keys.*
-import sbt.ScriptedPlugin.autoImport.*
 
 import de.heikoseeberger.sbtheader.{ CommentBlockCreator, CommentStyle }
 import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.*

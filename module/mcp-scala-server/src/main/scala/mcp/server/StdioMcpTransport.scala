@@ -10,19 +10,19 @@ import cats.syntax.all.*
 
 import cats.effect.*
 
+import fs2.*
+import fs2.io.*
+
 import io.circe.*
 import io.circe.parser.*
 import io.circe.syntax.*
-
-import fs2.*
-import fs2.io.*
 
 import mcp.schema.McpSchema
 
 case class StdioMcpTransport[F[_]: Async](
   requestHandlers: Map[String, RequestHandler[F]],
-  inputLogFile: Option[String] = None,
-  outputLogFile: Option[String] = None
+  inputLogFile:    Option[String] = None,
+  outputLogFile:   Option[String] = None
 ) extends McpTransport[F]:
 
   override def handleRequest(): F[Unit] =
@@ -35,10 +35,13 @@ case class StdioMcpTransport[F[_]: Async](
     val inputStreamWithLogging = inputLogFile match
       case Some(path) =>
         inputStream.evalTap(line =>
-          file.Files.forAsync[F].writeUtf8(
+          file.Files
+            .forAsync[F]
+            .writeUtf8(
               file.Path(path),
               file.Flags.Append
-            ).apply(Stream.emit(s"$line\n"))
+            )
+            .apply(Stream.emit(s"$line\n"))
             .compile
             .drain
         )
@@ -53,10 +56,13 @@ case class StdioMcpTransport[F[_]: Async](
     val outputStreamWithLogging = outputLogFile match
       case Some(path) =>
         processedStream.evalTap(result =>
-          file.Files.forAsync[F].writeUtf8(
+          file.Files
+            .forAsync[F]
+            .writeUtf8(
               file.Path(path),
               file.Flags.Append
-            ).apply(Stream.emit(result))
+            )
+            .apply(Stream.emit(result))
             .compile
             .drain
         )
@@ -80,30 +86,32 @@ case class StdioMcpTransport[F[_]: Async](
           )
         )
         Async[F].pure(response.asJson.noSpaces)
-      case Right(json) => json.as[McpSchema.JSONRPCMessage] match
-        case Left(error) =>
-          val response = McpSchema.JSONRPCResponse.failure(
-            McpSchema.JSONRPCError(
-              McpSchema.ErrorCodes.INVALID_REQUEST,
-              error.getMessage,
-              None
-            )
-          )
-          Async[F].pure(response.asJson.noSpaces)
-        case Right(request) =>
-          (request match
-            case req: McpSchema.JSONRPCRequest => handleIncomingRequest(req)
-            case notification: McpSchema.JSONRPCNotification => handleIncomingNotification(notification)
-            case batch: McpSchema.JSONRPCBatch => handleIncomingBatch(batch)
-            case _: McpSchema.JSONRPCResponse =>
-              val response = McpSchema.JSONRPCResponse.failure(
-                McpSchema.JSONRPCError(
-                  McpSchema.ErrorCodes.INVALID_REQUEST,
-                  "Invalid Request",
-                  None
-                )
+      case Right(json) =>
+        json.as[McpSchema.JSONRPCMessage] match
+          case Left(error) =>
+            val response = McpSchema.JSONRPCResponse.failure(
+              McpSchema.JSONRPCError(
+                McpSchema.ErrorCodes.INVALID_REQUEST,
+                error.getMessage,
+                None
               )
-              Async[F].pure(response)).map(_.asJson.noSpaces)
+            )
+            Async[F].pure(response.asJson.noSpaces)
+          case Right(request) =>
+            (request match
+              case req: McpSchema.JSONRPCRequest               => handleIncomingRequest(req)
+              case notification: McpSchema.JSONRPCNotification => handleIncomingNotification(notification)
+              case batch: McpSchema.JSONRPCBatch               => handleIncomingBatch(batch)
+              case _: McpSchema.JSONRPCResponse =>
+                val response = McpSchema.JSONRPCResponse.failure(
+                  McpSchema.JSONRPCError(
+                    McpSchema.ErrorCodes.INVALID_REQUEST,
+                    "Invalid Request",
+                    None
+                  )
+                )
+                Async[F].pure(response)
+            ).map(_.asJson.noSpaces)
 
   private def handleIncomingRequest(request: McpSchema.JSONRPCRequest): F[McpSchema.JSONRPCResponse] =
     requestHandlers.get(request.method) match
@@ -112,24 +120,25 @@ case class StdioMcpTransport[F[_]: Async](
           request.id,
           McpSchema.JSONRPCError(
             McpSchema.ErrorCodes.METHOD_NOT_FOUND,
-            s"Method not found: ${request.method}",
+            s"Method not found: ${ request.method }",
             None
           )
         )
         Async[F].pure(response)
-      case Some(handler) => handler.handle(request.params.getOrElse(Json.Null)).map {
-        case Left(error) =>
-          McpSchema.JSONRPCResponse.failure(
-            request.id,
-            McpSchema.JSONRPCError(
-              McpSchema.ErrorCodes.INTERNAL_ERROR,
-              error.getMessage,
-              None
+      case Some(handler) =>
+        handler.handle(request.params.getOrElse(Json.Null)).map {
+          case Left(error) =>
+            McpSchema.JSONRPCResponse.failure(
+              request.id,
+              McpSchema.JSONRPCError(
+                McpSchema.ErrorCodes.INTERNAL_ERROR,
+                error.getMessage,
+                None
+              )
             )
-          )
-        case Right(result) => McpSchema.JSONRPCResponse.success(request.id, result)
-      }
-      
+          case Right(result) => McpSchema.JSONRPCResponse.success(request.id, result)
+        }
+
   private def handleIncomingNotification(notification: McpSchema.JSONRPCNotification): F[McpSchema.JSONRPCResponse] =
     val response = McpSchema.JSONRPCResponse.success(
       McpSchema.JSONRPCRequest.Id.NullId,
@@ -138,31 +147,37 @@ case class StdioMcpTransport[F[_]: Async](
     requestHandlers.get(notification.method) match
       case None => Async[F].pure(response)
       case Some(handler) =>
-        handler.handle(notification.params.getOrElse(Json.Null)).map {
-          _ => response
+        handler.handle(notification.params.getOrElse(Json.Null)).map { _ =>
+          response
         }
 
   private def handleIncomingBatch(batch: McpSchema.JSONRPCBatch): F[McpSchema.JSONRPCResponse] =
     if batch.requests.isEmpty then
-      Async[F].pure(McpSchema.JSONRPCResponse.failure(
-        McpSchema.JSONRPCError(
-          McpSchema.ErrorCodes.INVALID_REQUEST,
-          "Empty batch",
-          None
+      Async[F].pure(
+        McpSchema.JSONRPCResponse.failure(
+          McpSchema.JSONRPCError(
+            McpSchema.ErrorCodes.INVALID_REQUEST,
+            "Empty batch",
+            None
+          )
         )
-      ))
+      )
     else
       val listIO = batch.requests.map {
-        case req: McpSchema.JSONRPCRequest => handleIncomingRequest(req).map(Some(_))
+        case req: McpSchema.JSONRPCRequest               => handleIncomingRequest(req).map(Some(_))
         case notification: McpSchema.JSONRPCNotification => handleIncomingNotification(notification).map(_ => None)
         case _ =>
-          Async[F].pure(Some(McpSchema.JSONRPCResponse.failure(
-            McpSchema.JSONRPCError(
-              McpSchema.ErrorCodes.INVALID_REQUEST,
-              "Invalid Request",
-              None
+          Async[F].pure(
+            Some(
+              McpSchema.JSONRPCResponse.failure(
+                McpSchema.JSONRPCError(
+                  McpSchema.ErrorCodes.INVALID_REQUEST,
+                  "Invalid Request",
+                  None
+                )
+              )
             )
-          )))
+          )
       }
       listIO.sequence.map { responses =>
         val filteredResponses = responses.flatten

@@ -8,60 +8,60 @@ package mcp.server
 
 import cats.syntax.all.*
 
+import cats.effect.Async
+
 import io.circe.*
 import io.circe.syntax.*
 
-import cats.effect.Async
-
-import mcp.schema.{McpSchema, McpError}
+import mcp.schema.{ McpError, McpSchema }
 
 trait RequestHandler[F[_]]:
-  
+
   def handle(request: Json): F[Either[Throwable, Json]]
 
 object RequestHandler:
-  
+
   class Provider[F[_]: Async](
-    serverInfo: McpSchema.Implementation,
+    serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
-    tools: List[McpSchema.Tool[F, ?]]
+    tools:        List[McpSchema.Tool[F, ?]]
   ):
-    
+
     def handlers: Map[String, RequestHandler[F]] =
       Map(
         // Lifecycle Methods
         McpSchema.METHOD_INITIALIZE -> Initialize[F](serverInfo, capabilities),
-        //McpSchema.METHOD_NOTIFICATION_INITIALIZED -> ???,
+        // McpSchema.METHOD_NOTIFICATION_INITIALIZED -> ???,
         McpSchema.METHOD_PING -> Ping[F](),
         // Tool Methods
         McpSchema.METHOD_TOOLS_LIST -> ListTools[F](serverInfo, capabilities, tools),
-        McpSchema.METHOD_TOOLS_CALL -> CallTools[F](serverInfo, capabilities, tools),
-        //McpSchema.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED -> ???,
+        McpSchema.METHOD_TOOLS_CALL -> CallTools[F](serverInfo, capabilities, tools)
+        // McpSchema.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED -> ???,
         // Resources Methods
-        //McpSchema.METHOD_RESOURCES_LIST -> ???,
-        //McpSchema.METHOD_RESOURCES_READ -> ???,
-        //McpSchema.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED -> ???,
-        //McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ???,
-        //McpSchema.METHOD_RESOURCES_SUBSCRIBE -> ???,
-        //McpSchema.METHOD_RESOURCES_UNSUBSCRIBE -> ???,
+        // McpSchema.METHOD_RESOURCES_LIST -> ???,
+        // McpSchema.METHOD_RESOURCES_READ -> ???,
+        // McpSchema.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED -> ???,
+        // McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ???,
+        // McpSchema.METHOD_RESOURCES_SUBSCRIBE -> ???,
+        // McpSchema.METHOD_RESOURCES_UNSUBSCRIBE -> ???,
         // Prompt Methods
-        //McpSchema.METHOD_PROMPT_LIST -> ???,
-        //McpSchema.METHOD_PROMPT_GET -> ???,
-        //McpSchema.METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED -> ???,
+        // McpSchema.METHOD_PROMPT_LIST -> ???,
+        // McpSchema.METHOD_PROMPT_GET -> ???,
+        // McpSchema.METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED -> ???,
         // Logging Methods
-        //McpSchema.METHOD_LOGGING_SET_LEVEL -> ???,
-        //McpSchema.METHOD_NOTIFICATION_MESSAGE -> ???,
+        // McpSchema.METHOD_LOGGING_SET_LEVEL -> ???,
+        // McpSchema.METHOD_NOTIFICATION_MESSAGE -> ???,
         // Roots Methods
-        //McpSchema.METHOD_ROOTS_LIST -> ???,
-        //McpSchema.METHOD_NOTIFICATION_ROOTS_LIST_CHANGED -> ???,
+        // McpSchema.METHOD_ROOTS_LIST -> ???,
+        // McpSchema.METHOD_NOTIFICATION_ROOTS_LIST_CHANGED -> ???,
         // Sampling Methods
-        //McpSchema.METHOD_SAMPLING_CREATE_MESSAGE -> ???,
+        // McpSchema.METHOD_SAMPLING_CREATE_MESSAGE -> ???,
       )
-  
+
   final case class Initialize[F[_]: Async](
-                                           serverInfo: McpSchema.Implementation,
-                                           capabilities: McpSchema.ServerCapabilities,
-                                         ) extends RequestHandler[F]:
+    serverInfo:   McpSchema.Implementation,
+    capabilities: McpSchema.ServerCapabilities
+  ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
       request.as[McpSchema.InitializeRequest] match
@@ -71,7 +71,7 @@ object RequestHandler:
             initializeRequest.protocolVersion,
             capabilities,
             serverInfo,
-            Some("This server is still under development"),
+            Some("This server is still under development")
           )
           Async[F].pure(Right(response.asJson))
 
@@ -91,10 +91,10 @@ object RequestHandler:
    * @tparam F
    */
   final case class ListTools[F[_]: Async](
-                                          serverInfo: McpSchema.Implementation,
-                                          capabilities: McpSchema.ServerCapabilities,
-                                          tools: List[McpSchema.Tool[F, ?]]
-                                        ) extends RequestHandler[F]:
+    serverInfo:   McpSchema.Implementation,
+    capabilities: McpSchema.ServerCapabilities,
+    tools:        List[McpSchema.Tool[F, ?]]
+  ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
       val response = McpSchema.ListToolsResult(tools, None)
@@ -110,18 +110,18 @@ object RequestHandler:
    * @tparam F
    */
   final case class CallTools[F[_]: Async](
-                                          serverInfo: McpSchema.Implementation,
-                                          capabilities: McpSchema.ServerCapabilities,
-                                          tools: List[McpSchema.Tool[F, ?]]
-                                        ) extends RequestHandler[F]:
+    serverInfo:   McpSchema.Implementation,
+    capabilities: McpSchema.ServerCapabilities,
+    tools:        List[McpSchema.Tool[F, ?]]
+  ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
       request.as[McpSchema.CallToolRequest] match
         case Left(error) => Async[F].pure(Left(error))
         case Right(callToolRequest) =>
           tools.find(_.name == callToolRequest.name) match
-            case None => Async[F].pure(Left(McpError(s"Tool not found: ${callToolRequest.name}")))
-            case Some(tool) => tool.decode(callToolRequest.arguments) match
-              case Left(error) => Async[F].pure(Left(error))
-              case Right(value) => tool.execute(value).map(v => Right(v.asJson))
-  
+            case None => Async[F].pure(Left(McpError(s"Tool not found: ${ callToolRequest.name }")))
+            case Some(tool) =>
+              tool.decode(callToolRequest.arguments) match
+                case Left(error)  => Async[F].pure(Left(error))
+                case Right(value) => tool.execute(value).map(v => Right(v.asJson))

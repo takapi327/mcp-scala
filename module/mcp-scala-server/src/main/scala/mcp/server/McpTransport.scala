@@ -7,7 +7,7 @@
 package mcp.server
 
 trait McpTransport[F[_]]:
-  
+
   def requestHandlers: Map[String, RequestHandler[F]]
 
   def handleRequest(): F[Unit]

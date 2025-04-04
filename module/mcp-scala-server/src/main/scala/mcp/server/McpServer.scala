@@ -8,30 +8,30 @@ package mcp.server
 
 import cats.effect.*
 
-import mcp.schema.{McpSchema, McpError}
+import mcp.schema.{ McpError, McpSchema }
 
 trait McpServer[F[_]]:
-  
+
   def serverInfo: McpSchema.Implementation
-  
+
   def capabilities: McpSchema.ServerCapabilities
 
   def addTool[T](tool: McpSchema.Tool[F, T]): McpServer[F]
-  
+
   def start(transportType: "stdio" | "sse"): F[Unit]
 
 object McpServer:
-  
+
   case class ToolSpecification[F[_]](tool: McpSchema.Tool[F, ?]):
-    
+
     def call(input: McpSchema.JsonSchema): McpSchema.CallToolResult = ???
 
   case class Imp[F[_]: Async](
-   serverInfo: McpSchema.Implementation,
-   capabilities: McpSchema.ServerCapabilities,
-    tools: List[McpSchema.Tool[F, ?]]
+    serverInfo:   McpSchema.Implementation,
+    capabilities: McpSchema.ServerCapabilities,
+    tools:        List[McpSchema.Tool[F, ?]]
   ) extends McpServer[F]:
-    
+
     private def handleProvider: RequestHandler.Provider[F] = new RequestHandler.Provider[F](
       serverInfo,
       capabilities,
