@@ -4,15 +4,18 @@
  *  please view the LICENSE file that was distributed with this source code.
  */
 
-import BuildSettings.*
-import ScalaVersions.*
-import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
+import scala.language.implicitConversions
+
 import sbt.*
 import sbt.Keys.*
-import sbtcrossproject.CrossProject
-import ProjectKeys.*
 
-import scala.language.implicitConversions
+import sbtcrossproject.CrossProject
+
+import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
+
+import BuildSettings.*
+import ProjectKeys.*
+import ScalaVersions.*
 
 object Implicits {
 

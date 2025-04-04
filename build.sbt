@@ -1,7 +1,7 @@
-import JavaVersions.*
-import ScalaVersions.*
-import ProjectKeys.*
 import Implicits.*
+import JavaVersions.*
+import ProjectKeys.*
+import ScalaVersions.*
 
 ThisBuild / tlBaseVersion      := "0.1"
 ThisBuild / tlFatalWarnings    := true
@@ -25,9 +25,9 @@ lazy val schema = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .module("schema", "Project for MCP schema")
   .settings(
     libraryDependencies ++= Seq(
-      "io.circe" %%% "circe-core" % "0.14.8",
+      "io.circe" %%% "circe-core"    % "0.14.8",
       "io.circe" %%% "circe-generic" % "0.14.8",
-      "io.circe" %%% "circe-parser" % "0.14.8",
+      "io.circe" %%% "circe-parser"  % "0.14.8"
     )
   )
 
@@ -36,12 +36,12 @@ lazy val server = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .module("server", "Project for MCP server")
   .settings(
     libraryDependencies ++= Seq(
-      "org.typelevel" %%% "cats-effect" % "3.6.0",
-      "co.fs2"        %%% "fs2-core"          % "3.12.0",
-      "co.fs2"        %%% "fs2-io"            % "3.12.0",
-      "org.http4s" %%% "http4s-ember-client" % "0.23.30",
-      "org.http4s" %%% "http4s-ember-server" % "0.23.30",
-      "org.http4s" %%% "http4s-dsl" % "0.23.30",
+      "org.typelevel" %%% "cats-effect"         % "3.6.0",
+      "co.fs2"        %%% "fs2-core"            % "3.12.0",
+      "co.fs2"        %%% "fs2-io"              % "3.12.0",
+      "org.http4s"    %%% "http4s-ember-client" % "0.23.30",
+      "org.http4s"    %%% "http4s-ember-server" % "0.23.30",
+      "org.http4s"    %%% "http4s-dsl"          % "0.23.30"
     )
   )
   .dependsOn(schema)
@@ -51,12 +51,12 @@ lazy val client = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .module("client", "Project for MCP client")
   .settings(
     libraryDependencies ++= Seq(
-      "org.typelevel" %%% "cats-effect" % "3.6.0",
-      "co.fs2"        %%% "fs2-core"          % "3.12.0",
-      "co.fs2"        %%% "fs2-io"            % "3.12.0",
-      "org.http4s" %%% "http4s-ember-client" % "0.23.30",
-      "org.http4s" %%% "http4s-ember-server" % "0.23.30",
-      "org.http4s" %%% "http4s-dsl" % "0.23.30",
+      "org.typelevel" %%% "cats-effect"         % "3.6.0",
+      "co.fs2"        %%% "fs2-core"            % "3.12.0",
+      "co.fs2"        %%% "fs2-io"              % "3.12.0",
+      "org.http4s"    %%% "http4s-ember-client" % "0.23.30",
+      "org.http4s"    %%% "http4s-ember-server" % "0.23.30",
+      "org.http4s"    %%% "http4s-dsl"          % "0.23.30"
     )
   )
   .dependsOn(schema)

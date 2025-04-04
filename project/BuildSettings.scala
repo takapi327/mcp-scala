@@ -4,13 +4,15 @@
  *  please view the LICENSE file that was distributed with this source code.
  */
 
-import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.*
-import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.HeaderPattern.commentBetween
-import de.heikoseeberger.sbtheader.{CommentBlockCreator, CommentStyle}
-import org.typelevel.sbt.TypelevelGitHubPlugin.autoImport.tlGitHubDev
 import sbt.*
 import sbt.Keys.*
 import sbt.ScriptedPlugin.autoImport.*
+
+import de.heikoseeberger.sbtheader.{ CommentBlockCreator, CommentStyle }
+import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.*
+import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.HeaderPattern.commentBetween
+
+import org.typelevel.sbt.TypelevelGitHubPlugin.autoImport.tlGitHubDev
 
 object BuildSettings {
 
