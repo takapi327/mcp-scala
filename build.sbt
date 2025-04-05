@@ -60,6 +60,24 @@ lazy val client = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   )
   .dependsOn(schema)
 
+lazy val ldbcMcpServerExample = crossProject(JVMPlatform, JSPlatform, NativePlatform)
+  .crossType(CrossType.Pure)
+  .example("ldbc-mcp-server", "Example project for MySQL MCP server using ldbc")
+  .settings(
+    run / fork := false,
+    libraryDependencies += "io.github.takapi327" %%% "ldbc-connector" % "0.3.0-RC1"
+  )
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+    Compile / mainClass := Some("StdioMain"),
+  )
+  .dependsOn(server)
+
+lazy val examples = Seq(
+  ldbcMcpServerExample
+)
+
 lazy val mcpScala = tlCrossRootProject
   .settings(description := "Pure functional MCP SDK with Cats Effect 3 and Scala 3")
   .settings(commonSettings)
@@ -68,4 +86,5 @@ lazy val mcpScala = tlCrossRootProject
     server,
     client
   )
+  .aggregate(examples *)
   .enablePlugins(NoPublishPlugin)
