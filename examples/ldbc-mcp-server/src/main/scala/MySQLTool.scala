@@ -2,9 +2,9 @@ import cats.effect.*
 
 import io.circe.*
 
-import ldbc.connector.*
-
 import mcp.schema.McpSchema
+
+import ldbc.connector.*
 
 case class MySQLTool(sql: String)
 object MySQLTool:
@@ -32,12 +32,12 @@ object MySQLTool:
           statement <- connection.createStatement()
           resultSet <- statement.executeQuery(request.sql)
         yield
-          val impl = resultSet.asInstanceOf[ResultSetImpl]
-          val columns = impl.columns.map(column => s"${column.name}: (${column.columnType.name})")
+          val impl    = resultSet.asInstanceOf[ResultSetImpl]
+          val columns = impl.columns.map(column => s"${ column.name }: (${ column.columnType.name })")
           val records = impl.records.map(_.values)
           val contents = List(
             McpSchema.Content.text(
-              s"Columns: ${columns.mkString(", ")}\nRecords: ${records.map(_.mkString(", ")).mkString("\n")}"
+              s"Columns: ${ columns.mkString(", ") }\nRecords: ${ records.map(_.mkString(", ")).mkString("\n") }"
             )
           )
           McpSchema.CallToolResult.success(contents)
