@@ -70,7 +70,7 @@ lazy val ldbcMcpServerExample = crossProject(JVMPlatform, JSPlatform, NativePlat
   .jsSettings(
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    Compile / mainClass := Some("StdioMain")
+    Compile / mainClass := Some("ldbc.mcp.StdioMain")
   )
   .dependsOn(server)
 
