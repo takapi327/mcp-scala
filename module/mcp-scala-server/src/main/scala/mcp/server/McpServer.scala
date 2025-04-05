@@ -24,7 +24,7 @@ trait McpServer[F[_]]:
 
 object McpServer:
 
-  private def voidTransport[F[_]]: McpTransport[F] = new McpTransport[F]:
+  private def voidTransport[F[_]: Async]: McpTransport[F] = new McpTransport[F]:
     override def requestHandlers: Map[String, RequestHandler[F]] = Map.empty
     override def handleRequest(): F[Unit]                        = Async[F].unit
 
@@ -63,7 +63,7 @@ object McpServer:
       tools
     )
 
-    def addTool[T](tool: McpSchema.Tool[F, T]): McpServer[F] =
+    def addTool[T](tool: McpSchema.Tool[F, T]): FastMcp[F] =
       this.copy(tools = tools :+ tool)
 
     def start(transportType: "stdio" | "sse"): F[Unit] =
