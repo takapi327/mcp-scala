@@ -64,13 +64,13 @@ lazy val ldbcMcpServerExample = crossProject(JVMPlatform, JSPlatform, NativePlat
   .crossType(CrossType.Pure)
   .example("ldbc-mcp-server", "Example project for MySQL MCP server using ldbc")
   .settings(
-    run / fork := false,
+    run / fork                                    := false,
     libraryDependencies += "io.github.takapi327" %%% "ldbc-connector" % "0.3.0-RC1"
   )
   .jsSettings(
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    Compile / mainClass := Some("StdioMain"),
+    Compile / mainClass := Some("StdioMain")
   )
   .dependsOn(server)
 
