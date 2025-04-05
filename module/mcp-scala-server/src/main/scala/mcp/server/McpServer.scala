@@ -22,7 +22,7 @@ trait McpServer[F[_]]:
 
 object McpServer:
 
-  case class Imp[F[_]: Async](
+  case class Imp[F[_]: Async: LiftIO](
     serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]]
@@ -42,7 +42,7 @@ object McpServer:
         case "stdio" => StdioMcpTransport(handleProvider.handlers, None, None).handleRequest()
         case "sse"   => Async[F].raiseError(new McpError("SSE transport is not implemented yet"))
 
-  def apply[F[_]: Async](name: String, version: String): McpServer[F] = Imp[F](
+  def apply[F[_]: Async: LiftIO](name: String, version: String): McpServer[F] = Imp[F](
     McpSchema.Implementation(name, version),
     McpSchema.ServerCapabilities(McpSchema.ToolCapabilities(false)),
     List.empty

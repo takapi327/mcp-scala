@@ -19,7 +19,7 @@ import fs2.io.{ file, stdin, stdout }
 
 import mcp.schema.McpSchema
 
-case class StdioMcpTransport[F[_]: Async](
+case class StdioMcpTransport[F[_]: Async: LiftIO](
   requestHandlers: Map[String, RequestHandler[F]],
   inputLogFile:    Option[String] = None,
   outputLogFile:   Option[String] = None
