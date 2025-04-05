@@ -1,3 +1,4 @@
+import BuildSettings.*
 import Implicits.*
 import JavaVersions.*
 import ProjectKeys.*
@@ -61,6 +62,7 @@ lazy val client = crossProject(JVMPlatform, JSPlatform, NativePlatform)
 
 lazy val mcpScala = tlCrossRootProject
   .settings(description := "Pure functional MCP SDK with Cats Effect 3 and Scala 3")
+  .settings(commonSettings)
   .aggregate(
     schema,
     server,
