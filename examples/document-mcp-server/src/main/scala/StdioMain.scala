@@ -15,7 +15,7 @@ import mcp.server.McpServer
 object StdioMain extends IOApp.Simple:
 
   private val resourceHandler = new McpSchema.ResourceHandler[IO]:
-    override def resource: McpSchema.Resource = McpSchema.Resource(
+    override def resource: McpSchema.StaticResource = McpSchema.Resource(
       "/Users/takapi327/Development/oss/typelevel/affiliate/ldbc/README.md",
       "ldbc documentation",
       "ldbc documentation",
@@ -26,7 +26,29 @@ object StdioMain extends IOApp.Simple:
       request =>
         file
           .Files[IO]
-          .readUtf8(file.Path(resource.uri))
+          .readUtf8(file.Path(request.uri))
+          .compile
+          .toList
+          .map { contents =>
+            McpSchema.ReadResourceResult(
+              contents.map(content => McpSchema.TextResourceContents(request.uri, "text/markdown", content))
+            )
+          }
+
+  private val resourceTemplateHandler = new McpSchema.ResourceHandler[IO]:
+    override def resource: McpSchema.ResourceTemplate = McpSchema.ResourceTemplate(
+      "/Users/takapi327/Development/oss/typelevel/affiliate/ldbc/{path}",
+      "ldbc Project Files",
+      "Access files in the ldbc project directory",
+      "text/markdown",
+      McpSchema.Annotations(List.empty, None)
+    )
+
+    override def readHandler: McpSchema.ReadResourceRequest => IO[McpSchema.ReadResourceResult] =
+      request =>
+        file
+          .Files[IO]
+          .readUtf8(file.Path(request.uri))
           .compile
           .toList
           .map { contents =>
@@ -45,4 +67,5 @@ object StdioMain extends IOApp.Simple:
         )
       )
       .addResource(resourceHandler)
+      .addResource(resourceTemplateHandler)
       .start("stdio")
