@@ -312,7 +312,7 @@ object McpSchema:
   final case class ServerCapabilities(
     // experimental: Option[Map[String, Json]],
     // logging: LoggingCapabilities,
-    prompt: PromptCapabilities,
+    prompt:    PromptCapabilities,
     resources: ResourceCapabilities,
     tools:     ToolCapabilities
   )
@@ -635,10 +635,10 @@ object McpSchema:
     given Encoder[Prompt] = Encoder.derived[Prompt]
 
   case class PromptHandler[F[_]](
-    prompt: Prompt,
+    prompt:  Prompt,
     handler: GetPromptRequest => F[GetPromptResult]
   )
-  
+
   // ---------------------------
   // Content Types
   // ---------------------------
@@ -746,8 +746,8 @@ object McpSchema:
    * @param arguments Arguments to use for templating the prompt.
    */
   final case class GetPromptRequest(
-                                     name: String,
-                                     arguments:    Map[String, Json]
+    name:      String,
+    arguments: Map[String, Json]
   ) extends Request
   object GetPromptRequest:
     given Decoder[GetPromptRequest] = Decoder.derived[GetPromptRequest]
@@ -760,8 +760,8 @@ object McpSchema:
    * @param messages    A list of messages to display as part of the prompt.
    */
   final case class GetPromptResult(
-                                    description: Option[String],
-                                    messages: List[PromptMessage]
+    description: Option[String],
+    messages:    List[PromptMessage]
   )
   object GetPromptResult:
     given Decoder[GetPromptResult] = Decoder.derived[GetPromptResult]

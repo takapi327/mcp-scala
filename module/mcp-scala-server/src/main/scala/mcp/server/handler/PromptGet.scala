@@ -6,11 +6,15 @@
 
 package mcp.server.handler
 
-import cats.effect.Async
 import cats.syntax.all.*
+
+import cats.effect.Async
+
 import io.circe.*
 import io.circe.syntax.*
+
 import mcp.schema.McpSchema
+
 import mcp.server.RequestHandler
 
 /**
@@ -23,5 +27,5 @@ case class PromptGet[F[_]: Async](prompts: List[McpSchema.PromptHandler[F]]) ext
       case Left(error) => Async[F].pure(Left(error))
       case Right(request) =>
         prompts.find(_.prompt.name == request.name) match
-          case None => Async[F].pure(Left(new Exception(s"Prompt not found: ${ request.name }")))
+          case None         => Async[F].pure(Left(new Exception(s"Prompt not found: ${ request.name }")))
           case Some(prompt) => prompt.handler(request).map(result => Right(result.asJson))

@@ -5,8 +5,11 @@
  */
 
 import cats.effect.*
+
 import fs2.io.*
+
 import mcp.schema.McpSchema
+
 import mcp.server.McpServer
 
 object StdioMain extends IOApp.Simple:
@@ -76,10 +79,12 @@ object StdioMain extends IOApp.Simple:
           val content = McpSchema.Content.text(s"Please review this Scala code:\n\n$code")
           val result = McpSchema.GetPromptResult(
             Some("Code review prompt"),
-            List(McpSchema.PromptMessage(
-              McpSchema.Role.USER,
-              content,
-            ))
+            List(
+              McpSchema.PromptMessage(
+                McpSchema.Role.USER,
+                content
+              )
+            )
           )
           IO.pure(result)
     }

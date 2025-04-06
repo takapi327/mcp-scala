@@ -52,7 +52,7 @@ object McpServer:
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
-    prompts: List[McpSchema.PromptHandler[F]],
+    prompts:      List[McpSchema.PromptHandler[F]],
     transport:    McpTransport[F]
   ) extends McpServer[F]:
 
@@ -79,7 +79,7 @@ object McpServer:
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
-    prompts: List[McpSchema.PromptHandler[F]],
+    prompts:      List[McpSchema.PromptHandler[F]],
     handlers:     Map[McpSchema.Method, RequestHandler[F]]
   ):
 
@@ -133,5 +133,5 @@ object McpServer:
         List.empty,
         List.empty,
         List.empty,
-        handleProvider.handlers,
+        handleProvider.handlers
       )
