@@ -5,11 +5,8 @@
  */
 
 import cats.effect.*
-
 import fs2.io.*
-
 import mcp.schema.McpSchema
-
 import mcp.server.McpServer
 
 object StdioMain extends IOApp.Simple:
@@ -18,8 +15,8 @@ object StdioMain extends IOApp.Simple:
     override def resource: McpSchema.StaticResource = McpSchema.Resource(
       "/Users/takapi327/Development/oss/typelevel/affiliate/ldbc/README.md",
       "ldbc documentation",
-      "ldbc documentation",
-      "text/markdown",
+      None,
+      None,
       McpSchema.Annotations(List.empty, None)
     )
     override def readHandler: McpSchema.ReadResourceRequest => IO[McpSchema.ReadResourceResult] =
@@ -39,8 +36,8 @@ object StdioMain extends IOApp.Simple:
     override def resource: McpSchema.ResourceTemplate = McpSchema.ResourceTemplate(
       "/Users/takapi327/Development/oss/typelevel/affiliate/ldbc/{path}",
       "ldbc Project Files",
-      "Access files in the ldbc project directory",
-      "text/markdown",
+      Some("Access files in the ldbc project directory"),
+      None,
       McpSchema.Annotations(List.empty, None)
     )
 
@@ -57,15 +54,41 @@ object StdioMain extends IOApp.Simple:
             )
           }
 
+  private val prompt = McpSchema.Prompt(
+    "Code Review",
+    "Please review the code and provide feedback.",
+    List(
+      McpSchema.PromptArgument(
+        "code",
+        "The code to review",
+        true
+      )
+    )
+  )
+
+  private val promptHandler = McpSchema.PromptHandler(
+    prompt,
+    request => {
+      val codeOpt = request.arguments.get("code").flatMap(_.as[String].toOption)
+      codeOpt match
+        case None => IO.raiseError(new Exception("Code argument is required"))
+        case Some(code) =>
+          val content = McpSchema.Content.text(s"Please review this Scala code:\n\n$code")
+          val result = McpSchema.GetPromptResult(
+            Some("Code review prompt"),
+            List(McpSchema.PromptMessage(
+              McpSchema.Role.USER,
+              content,
+            ))
+          )
+          IO.pure(result)
+    }
+  )
+
   override def run: IO[Unit] =
     McpServer
       .FastMcp[IO]("Documentation Server", "0.1.0")
-      .setCapabilities(
-        McpSchema.ServerCapabilities(
-          McpSchema.ResourceCapabilities(None, None),
-          McpSchema.ToolCapabilities(false)
-        )
-      )
       .addResource(resourceHandler)
       .addResource(resourceTemplateHandler)
+      .addPrompt(promptHandler)
       .start("stdio")
