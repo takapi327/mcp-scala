@@ -377,6 +377,42 @@ object McpSchema:
   sealed trait Annotated:
     def annotations: Annotations
 
+  trait Resource:
+    def name: String
+    def description: String
+    def mimeType: String
+
+    private[mcp] def isStatic: Boolean
+
+  object Resource:
+
+    given Decoder[Resource] = Decoder.instance { cursor =>
+      cursor.get[Option[String]]("uri").flatMap {
+        case Some(uri) =>
+          cursor.as[StaticResource]
+        case None =>
+          cursor.get[Option[String]]("uriTemplate").flatMap {
+            case Some(uriTemplate) =>
+              cursor.as[ResourceTemplate]
+            case None =>
+              Left(DecodingFailure("Invalid resource", cursor.history))
+          }
+      }
+    }
+
+    given Encoder[Resource] = Encoder.instance {
+      case static: StaticResource         => static.asJson
+      case template: ResourceTemplate => template.asJson
+    }
+
+    def apply(
+      uri:         String,
+      name:        String,
+      description: String,
+      mimeType:    String,
+      annotations: Annotations
+    ): StaticResource = StaticResource(uri, name, description, mimeType, annotations)
+
   /**
    * A known resource that the server is capable of reading.
    *
@@ -390,17 +426,19 @@ object McpSchema:
    * @param annotations Optional annotations for the client. The client can use
    *                    annotations to inform how objects are used or displayed.
    */
-  final case class Resource(
+  final case class StaticResource(
     uri:         String,
     name:        String,
     description: String,
     mimeType:    String,
     annotations: Annotations
-  ) extends Annotated
+  ) extends Resource:
 
-  object Resource:
-    given Decoder[Resource] = Decoder.derived[Resource]
-    given Encoder[Resource] = Encoder.derived[Resource].mapJson(_.dropNullValues)
+    override private[mcp] def isStatic: Boolean = true
+
+  object StaticResource:
+    given Decoder[StaticResource] = Decoder.derived[StaticResource]
+    given Encoder[StaticResource] = Encoder.derived[StaticResource].mapJson(_.dropNullValues)
 
   trait ResourceHandler[F[_]]:
 
@@ -430,7 +468,9 @@ object McpSchema:
     description: String,
     mimeType:    String,
     annotations: Annotations
-  ) extends Annotated
+  ) extends Resource:
+
+    override private[mcp] def isStatic: Boolean = false
 
   object ResourceTemplate:
     given Decoder[ResourceTemplate] = Decoder.derived[ResourceTemplate]
@@ -443,6 +483,14 @@ object McpSchema:
   object ListResourcesResult:
     given Decoder[ListResourcesResult] = Decoder.derived[ListResourcesResult]
     given Encoder[ListResourcesResult] = Encoder.derived[ListResourcesResult].mapJson(_.dropNullValues)
+
+  final case class ListResourceTemplatesResult(
+                                                resourceTemplates: List[Resource],
+                                                nextCursor: Option[String]
+                                              )
+  object ListResourceTemplatesResult:
+    given Decoder[ListResourceTemplatesResult] = Decoder.derived[ListResourceTemplatesResult]
+    given Encoder[ListResourceTemplatesResult] = Encoder.derived[ListResourceTemplatesResult].mapJson(_.dropNullValues)
 
   final case class ReadResourceRequest(uri: String)
   object ReadResourceRequest:

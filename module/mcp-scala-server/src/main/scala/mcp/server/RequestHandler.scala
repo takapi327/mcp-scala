@@ -42,9 +42,10 @@ object RequestHandler:
         // McpSchema.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED -> ???,
         // Resources Methods
         McpSchema.METHOD_RESOURCES_LIST -> ResourcesList[F](resources),
-        McpSchema.METHOD_RESOURCES_READ -> ResourcesRead[F](resources)
+        McpSchema.METHOD_RESOURCES_READ -> ResourcesRead[F](resources),
+        // METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED is unsupported @see https://github.com/modelcontextprotocol/java-sdk/blob/79ec5b5ed1cc1a7abf2edda313a81875bd75ad86/mcp/src/main/java/io/modelcontextprotocol/server/McpAsyncServer.java#L530
         // McpSchema.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED -> ???,
-        // McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ???,
+        McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ResourceTemplatesList[F](resources),
         // McpSchema.METHOD_RESOURCES_SUBSCRIBE -> ???,
         // McpSchema.METHOD_RESOURCES_UNSUBSCRIBE -> ???,
         // Prompt Methods

@@ -26,7 +26,12 @@ case class ResourcesRead[F[_]: Async](resources: List[McpSchema.ResourceHandler[
     request.as[McpSchema.ReadResourceRequest] match
       case Left(error) => Async[F].pure(Left(error))
       case Right(request) =>
-        resources.find(_.resource.uri == request.uri) match
+        resources.find(_.resource match
+          case resource: McpSchema.StaticResource => resource.uri == request.uri
+          case resource: McpSchema.ResourceTemplate =>
+            val templateFormat = resource.uriTemplate.replaceAll("\\{[^}]+\\}", ".*")
+            request.uri.matches(templateFormat)
+        ) match
           case None => Async[F].pure(Left(new Exception(s"Resource not found: ${ request.uri }")))
           case Some(resource) =>
             resource.readHandler(request).map(result => Right(result.asJson))
