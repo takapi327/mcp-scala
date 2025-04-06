@@ -6,8 +6,10 @@
 
 package mcp.server
 
+import mcp.schema.McpSchema.Method
+
 trait McpTransport[F[_]]:
 
-  def requestHandlers: Map[String, RequestHandler[F]]
+  def requestHandlers: Map[Method, RequestHandler[F]]
 
   def handleRequest(): F[Unit]

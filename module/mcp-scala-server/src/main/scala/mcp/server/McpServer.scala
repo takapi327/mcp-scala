@@ -29,7 +29,7 @@ trait McpServer[F[_]]:
 object McpServer:
 
   private def voidTransport[F[_]: Async]: McpTransport[F] = new McpTransport[F]:
-    override def requestHandlers: Map[String, RequestHandler[F]] = Map.empty
+    override def requestHandlers: Map[McpSchema.Method, RequestHandler[F]] = Map.empty
     override def handleRequest(): F[Unit]                        = Async[F].unit
 
   def apply[F[_]: Async: LiftIO](name: String, version: String): McpServer[F] = Impl[F](
@@ -67,7 +67,8 @@ object McpServer:
     serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
-    resources:    List[McpSchema.ResourceHandler[F]]
+    resources:    List[McpSchema.ResourceHandler[F]],
+    handlers: Map[McpSchema.Method, RequestHandler[F]]
   ):
 
     private def handleProvider: RequestHandler.Provider[F] = new RequestHandler.Provider[F](
@@ -86,6 +87,9 @@ object McpServer:
     def setCapabilities(capabilities: McpSchema.ServerCapabilities): FastMcp[F] =
       this.copy(capabilities = capabilities)
 
+    def setRequestHandler(method: McpSchema.Method, requestHandler: RequestHandler[F]): FastMcp[F] =
+      this.copy(handlers = handlers + (method -> requestHandler))
+
     def start(transportType: "stdio" | "sse"): F[Unit] =
       transportType match
         case "stdio" => StdioMcpTransport(handleProvider.handlers, None, None).handleRequest()
@@ -93,9 +97,22 @@ object McpServer:
 
   object FastMcp:
 
-    def apply[F[_]: Async: LiftIO](name: String, version: String): FastMcp[F] = FastMcp[F](
-      McpSchema.Implementation(name, version),
-      McpSchema.ServerCapabilities(McpSchema.ResourceCapabilities(None, None), McpSchema.ToolCapabilities(false)),
-      List.empty,
-      List.empty
-    )
+    def apply[F[_]: Async: LiftIO](name: String, version: String): FastMcp[F] =
+      val serverInfo = McpSchema.Implementation(name, version)
+      val capabilities = McpSchema.ServerCapabilities(
+        McpSchema.ResourceCapabilities(None, None),
+        McpSchema.ToolCapabilities(false)
+      )
+      val handleProvider = new RequestHandler.Provider[F](
+        serverInfo,
+        capabilities,
+        List.empty,
+        List.empty
+      )
+      FastMcp[F](
+        serverInfo,
+        capabilities,
+        List.empty,
+        List.empty,
+        handleProvider.handlers
+      )

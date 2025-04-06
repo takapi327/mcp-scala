@@ -25,43 +25,59 @@ object McpSchema:
 
   val JSONRPC_VERSION: String = "2.0"
 
+  opaque type Method = String
+  object Method:
+
+    def apply(value: String): Method = value
+    def unapply(value: Method): String = value
+
+    extension (value: Method)
+      def asString: String = value
+
+    given Decoder[Method] = Decoder.instance { cursor =>
+      cursor.as[String].map(Method.apply)
+    }
+    given Encoder[Method] = Encoder.instance { value =>
+      Json.fromString(Method.unapply(value))
+    }
+
   // ---------------------------
   // Method Names
   // ---------------------------
 
   // Lifecycle Methods
-  val METHOD_INITIALIZE:               String = "initialize"
-  val METHOD_NOTIFICATION_INITIALIZED: String = "notifications/initialized"
-  val METHOD_PING:                     String = "ping"
+  val METHOD_INITIALIZE:               Method = "initialize"
+  val METHOD_NOTIFICATION_INITIALIZED: Method = "notifications/initialized"
+  val METHOD_PING:                     Method = "ping"
 
   // Tool Methods
-  val METHOD_TOOLS_LIST:                      String = "tools/list"
-  val METHOD_TOOLS_CALL:                      String = "tools/call"
-  val METHOD_NOTIFICATION_TOOLS_LIST_CHANGED: String = "notifications/tools/list_changed"
+  val METHOD_TOOLS_LIST:                      Method = "tools/list"
+  val METHOD_TOOLS_CALL:                      Method = "tools/call"
+  val METHOD_NOTIFICATION_TOOLS_LIST_CHANGED: Method = "notifications/tools/list_changed"
 
   // Resources Methods
-  val METHOD_RESOURCES_LIST:                      String = "resources/list"
-  val METHOD_RESOURCES_READ:                      String = "resources/read"
-  val METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED: String = "notifications/resources/list_changed"
-  val METHOD_RESOURCES_TEMPLATES_LIST:            String = "resources/templates/list"
-  val METHOD_RESOURCES_SUBSCRIBE:                 String = "resources/subscribe"
-  val METHOD_RESOURCES_UNSUBSCRIBE:               String = "resources/unsubscribe"
+  val METHOD_RESOURCES_LIST:                      Method = "resources/list"
+  val METHOD_RESOURCES_READ:                      Method = "resources/read"
+  val METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED: Method = "notifications/resources/list_changed"
+  val METHOD_RESOURCES_TEMPLATES_LIST:            Method = "resources/templates/list"
+  val METHOD_RESOURCES_SUBSCRIBE:                 Method = "resources/subscribe"
+  val METHOD_RESOURCES_UNSUBSCRIBE:               Method = "resources/unsubscribe"
 
   // Prompt Methods
-  val METHOD_PROMPT_LIST:                       String = "prompts/list"
-  val METHOD_PROMPT_GET:                        String = "prompts/get"
-  val METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED: String = "notifications/prompts/list_changed"
+  val METHOD_PROMPT_LIST:                       Method = "prompts/list"
+  val METHOD_PROMPT_GET:                        Method = "prompts/get"
+  val METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED: Method = "notifications/prompts/list_changed"
 
   // Logging Methods
-  val METHOD_LOGGING_SET_LEVEL:    String = "logging/setLevel"
-  val METHOD_NOTIFICATION_MESSAGE: String = "notifications/message"
+  val METHOD_LOGGING_SET_LEVEL:    Method = "logging/setLevel"
+  val METHOD_NOTIFICATION_MESSAGE: Method = "notifications/message"
 
   // Roots Methods
-  val METHOD_ROOTS_LIST:                      String = "roots/list"
-  val METHOD_NOTIFICATION_ROOTS_LIST_CHANGED: String = "notifications/roots/list_changed"
+  val METHOD_ROOTS_LIST:                      Method = "roots/list"
+  val METHOD_NOTIFICATION_ROOTS_LIST_CHANGED: Method = "notifications/roots/list_changed"
 
   // Sampling Methods
-  val METHOD_SAMPLING_CREATE_MESSAGE: String = "sampling/createMessage"
+  val METHOD_SAMPLING_CREATE_MESSAGE: Method = "sampling/createMessage"
 
   // ---------------------------
   // JSON-RPC Error Codes
@@ -127,7 +143,7 @@ object McpSchema:
 
   final case class JSONRPCRequest(
     jsonrpc: String,
-    method:  String,
+    method:  Method,
     id:      JSONRPCRequest.Id,
     params:  Option[Json]
   ) extends JSONRPCMessage
@@ -167,7 +183,7 @@ object McpSchema:
 
   final case class JSONRPCNotification(
     jsonrpc: String,
-    method:  String,
+    method:  Method,
     params:  Option[Json]
   ) extends JSONRPCMessage
 

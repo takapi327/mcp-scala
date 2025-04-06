@@ -30,7 +30,7 @@ object RequestHandler:
     resources:    List[McpSchema.ResourceHandler[F]]
   ):
 
-    def handlers: Map[String, RequestHandler[F]] =
+    def handlers: Map[McpSchema.Method, RequestHandler[F]] =
       Map(
         // Lifecycle Methods
         McpSchema.METHOD_INITIALIZE               -> Initialize[F](serverInfo, capabilities),
