@@ -339,5 +339,5 @@ jobs:
       - name: Submit Dependencies
         uses: scalacenter/sbt-dependency-submission@v2
         with:
-          modules-ignore: ldbc-mcp-server_sjs1_3 mcpscalajs_3 mcpscalajs_3 mcpscalajvm_3 mcpscalajvm_3 mcpscalanative_3 mcpscalanative_3 ldbc-mcp-server_3 ldbc-mcp-server_native0.4_3
+          modules-ignore: document-mcp-server_sjs1_3 ldbc-mcp-server_sjs1_3 document-mcp-server_3 document-mcp-server_native0.4_3 mcpscalajs_3 mcpscalajs_3 mcpscalajvm_3 mcpscalajvm_3 mcpscalanative_3 mcpscalanative_3 ldbc-mcp-server_3 ldbc-mcp-server_native0.4_3
           configs-ignore: test scala-tool scala-doc-tool test-internal
