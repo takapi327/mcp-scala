@@ -18,6 +18,10 @@ trait McpServer[F[_]]:
 
   def addTool[T](tool: McpSchema.Tool[F, T]): McpServer[F]
 
+  def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F]
+  
+  def setCapabilities(capabilities: McpSchema.ServerCapabilities): McpServer[F]
+
   def connect(transport: McpTransport[F]): McpServer[F]
 
   def start(): F[Unit]
@@ -30,7 +34,8 @@ object McpServer:
 
   def apply[F[_]: Async: LiftIO](name: String, version: String): McpServer[F] = Impl[F](
     McpSchema.Implementation(name, version),
-    McpSchema.ServerCapabilities(McpSchema.ToolCapabilities(false)),
+    McpSchema.ServerCapabilities(McpSchema.ResourceCapabilities(None, None), McpSchema.ToolCapabilities(false)),
+    List.empty,
     List.empty,
     voidTransport
   )
@@ -39,11 +44,18 @@ object McpServer:
     serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
+    resources:  List[McpSchema.ResourceHandler[F]],
     transport:    McpTransport[F]
   ) extends McpServer[F]:
 
     override def addTool[T](tool: McpSchema.Tool[F, T]): McpServer[F] =
       this.copy(tools = tools :+ tool)
+
+    override def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F] =
+      this.copy(resources = resources :+ resource)
+      
+    override def setCapabilities(capabilities: McpSchema.ServerCapabilities): McpServer[F] =
+      this.copy(capabilities = capabilities)
 
     override def connect(transport: McpTransport[F]): McpServer[F] =
       this.copy(transport = transport)
@@ -54,17 +66,25 @@ object McpServer:
   case class FastMcp[F[_]: Async: LiftIO](
     serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
-    tools:        List[McpSchema.Tool[F, ?]]
+    tools:        List[McpSchema.Tool[F, ?]],
+    resources:  List[McpSchema.ResourceHandler[F]]
   ):
 
     private def handleProvider: RequestHandler.Provider[F] = new RequestHandler.Provider[F](
       serverInfo,
       capabilities,
-      tools
+      tools,
+      resources
     )
 
     def addTool[T](tool: McpSchema.Tool[F, T]): FastMcp[F] =
       this.copy(tools = tools :+ tool)
+
+    def addResource(resource: McpSchema.ResourceHandler[F]): FastMcp[F] =
+      this.copy(resources = resources :+ resource)
+
+    def setCapabilities(capabilities: McpSchema.ServerCapabilities): FastMcp[F] =
+      this.copy(capabilities = capabilities)
 
     def start(transportType: "stdio" | "sse"): F[Unit] =
       transportType match
@@ -75,6 +95,7 @@ object McpServer:
 
     def apply[F[_]: Async: LiftIO](name: String, version: String): FastMcp[F] = FastMcp[F](
       McpSchema.Implementation(name, version),
-      McpSchema.ServerCapabilities(McpSchema.ToolCapabilities(false)),
+      McpSchema.ServerCapabilities(McpSchema.ResourceCapabilities(None, None), McpSchema.ToolCapabilities(false)),
+      List.empty,
       List.empty
     )

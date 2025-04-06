@@ -282,12 +282,12 @@ object McpSchema:
     given Encoder[PromptCapabilities] = Encoder.derived[PromptCapabilities]
 
   final case class ResourceCapabilities(
-    subscribe:   Boolean,
-    listChanged: Boolean
+    subscribe:   Option[Boolean],
+    listChanged: Option[Boolean]
   )
   object ResourceCapabilities:
     given Decoder[ResourceCapabilities] = Decoder.derived[ResourceCapabilities]
-    given Encoder[ResourceCapabilities] = Encoder.derived[ResourceCapabilities]
+    given Encoder[ResourceCapabilities] = Encoder.derived[ResourceCapabilities].mapJson(_.dropNullValues)
 
   final case class ToolCapabilities(listChanged: Boolean)
   object ToolCapabilities:
@@ -298,7 +298,7 @@ object McpSchema:
     // experimental: Option[Map[String, Json]],
     // logging: LoggingCapabilities,
     // prompt: PromptCapabilities,
-    // resources: ResourceCapabilities,
+    resources: ResourceCapabilities,
     tools: ToolCapabilities
   )
   object ServerCapabilities:
@@ -361,11 +361,11 @@ object McpSchema:
    */
   final case class Annotations(
     audience: List[Role],
-    priority: Double
+    priority: Option[Double]
   )
   object Annotations:
     given Decoder[Annotations] = Decoder.derived[Annotations]
-    given Encoder[Annotations] = Encoder.derived[Annotations]
+    given Encoder[Annotations] = Encoder.derived[Annotations].mapJson(_.dropNullValues)
 
   // ---------------------------
   // Resource Interfaces
@@ -400,7 +400,13 @@ object McpSchema:
 
   object Resource:
     given Decoder[Resource] = Decoder.derived[Resource]
-    given Encoder[Resource] = Encoder.derived[Resource]
+    given Encoder[Resource] = Encoder.derived[Resource].mapJson(_.dropNullValues)
+
+  trait ResourceHandler[F[_]]:
+
+    def resource: Resource
+
+    def readHandler: ReadResourceRequest => F[ReadResourceResult]
 
   /**
    * Resource templates allow servers to expose parameterized resources using URI
@@ -432,11 +438,11 @@ object McpSchema:
 
   final case class ListResourcesResult(
     resources:  List[Resource],
-    nextCursor: String
+    nextCursor: Option[String]
   )
   object ListResourcesResult:
     given Decoder[ListResourcesResult] = Decoder.derived[ListResourcesResult]
-    given Encoder[ListResourcesResult] = Encoder.derived[ListResourcesResult]
+    given Encoder[ListResourcesResult] = Encoder.derived[ListResourcesResult].mapJson(_.dropNullValues)
 
   final case class ReadResourceRequest(uri: String)
   object ReadResourceRequest:
