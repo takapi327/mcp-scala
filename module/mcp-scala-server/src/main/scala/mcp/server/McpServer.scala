@@ -30,7 +30,7 @@ object McpServer:
 
   private def voidTransport[F[_]: Async]: McpTransport[F] = new McpTransport[F]:
     override def requestHandlers: Map[McpSchema.Method, RequestHandler[F]] = Map.empty
-    override def handleRequest(): F[Unit]                        = Async[F].unit
+    override def handleRequest(): F[Unit]                                  = Async[F].unit
 
   def apply[F[_]: Async: LiftIO](name: String, version: String): McpServer[F] = Impl[F](
     McpSchema.Implementation(name, version),
@@ -68,7 +68,7 @@ object McpServer:
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
-    handlers: Map[McpSchema.Method, RequestHandler[F]]
+    handlers:     Map[McpSchema.Method, RequestHandler[F]]
   ):
 
     private def handleProvider: RequestHandler.Provider[F] = new RequestHandler.Provider[F](

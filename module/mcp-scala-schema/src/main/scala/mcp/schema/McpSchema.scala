@@ -28,11 +28,10 @@ object McpSchema:
   opaque type Method = String
   object Method:
 
-    def apply(value: String): Method = value
+    def apply(value:   String): Method = value
     def unapply(value: Method): String = value
 
-    extension (value: Method)
-      def asString: String = value
+    extension (value: Method) def asString: String = value
 
     given Decoder[Method] = Decoder.instance { cursor =>
       cursor.as[String].map(Method.apply)
