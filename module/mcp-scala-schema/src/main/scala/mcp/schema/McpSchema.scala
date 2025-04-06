@@ -378,9 +378,9 @@ object McpSchema:
     def annotations: Annotations
 
   trait Resource:
-    def name: String
+    def name:        String
     def description: String
-    def mimeType: String
+    def mimeType:    String
 
     private[mcp] def isStatic: Boolean
 
@@ -401,7 +401,7 @@ object McpSchema:
     }
 
     given Encoder[Resource] = Encoder.instance {
-      case static: StaticResource         => static.asJson
+      case static: StaticResource     => static.asJson
       case template: ResourceTemplate => template.asJson
     }
 
@@ -485,9 +485,9 @@ object McpSchema:
     given Encoder[ListResourcesResult] = Encoder.derived[ListResourcesResult].mapJson(_.dropNullValues)
 
   final case class ListResourceTemplatesResult(
-                                                resourceTemplates: List[Resource],
-                                                nextCursor: Option[String]
-                                              )
+    resourceTemplates: List[Resource],
+    nextCursor:        Option[String]
+  )
   object ListResourceTemplatesResult:
     given Decoder[ListResourceTemplatesResult] = Decoder.derived[ListResourceTemplatesResult]
     given Encoder[ListResourceTemplatesResult] = Encoder.derived[ListResourceTemplatesResult].mapJson(_.dropNullValues)

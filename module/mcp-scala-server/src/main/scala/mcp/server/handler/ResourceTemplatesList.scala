@@ -6,11 +6,15 @@
 
 package mcp.server.handler
 
-import cats.effect.Async
 import cats.syntax.all.*
+
+import cats.effect.Async
+
 import io.circe.*
 import io.circe.syntax.*
+
 import mcp.schema.McpSchema
+
 import mcp.server.RequestHandler
 
 /**
