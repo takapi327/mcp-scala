@@ -74,8 +74,20 @@ lazy val ldbcMcpServerExample = crossProject(JVMPlatform, JSPlatform, NativePlat
   )
   .dependsOn(server)
 
+lazy val documentMcpServerExample = crossProject(JVMPlatform, JSPlatform, NativePlatform)
+  .crossType(CrossType.Pure)
+  .example("document-mcp-server", "Example project for Documentation MCP server")
+  .settings(run / fork := false)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+    Compile / mainClass := Some("StdioMain")
+  )
+  .dependsOn(server)
+
 lazy val examples = Seq(
-  ldbcMcpServerExample
+  ldbcMcpServerExample,
+  documentMcpServerExample
 )
 
 lazy val mcpScala = tlCrossRootProject
