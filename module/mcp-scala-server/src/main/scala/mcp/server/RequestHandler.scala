@@ -27,7 +27,8 @@ object RequestHandler:
     serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
-    resources:    List[McpSchema.ResourceHandler[F]]
+    resources:    List[McpSchema.ResourceHandler[F]],
+    prompts: List[McpSchema.PromptHandler[F]]
   ):
 
     def handlers: Map[McpSchema.Method, RequestHandler[F]] =
@@ -39,19 +40,13 @@ object RequestHandler:
         // Tool Methods
         McpSchema.METHOD_TOOLS_LIST -> ListTools[F](serverInfo, capabilities, tools),
         McpSchema.METHOD_TOOLS_CALL -> CallTools[F](serverInfo, capabilities, tools),
-        // McpSchema.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED -> ???,
         // Resources Methods
         McpSchema.METHOD_RESOURCES_LIST -> ResourcesList[F](resources),
         McpSchema.METHOD_RESOURCES_READ -> ResourcesRead[F](resources),
-        // METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED is unsupported @see https://github.com/modelcontextprotocol/java-sdk/blob/79ec5b5ed1cc1a7abf2edda313a81875bd75ad86/mcp/src/main/java/io/modelcontextprotocol/server/McpAsyncServer.java#L530
-        // McpSchema.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED -> ???,
-        McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ResourceTemplatesList[F](resources)
-        // McpSchema.METHOD_RESOURCES_SUBSCRIBE -> ???,
-        // McpSchema.METHOD_RESOURCES_UNSUBSCRIBE -> ???,
+        McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ResourceTemplatesList[F](resources),
         // Prompt Methods
-        // McpSchema.METHOD_PROMPT_LIST -> ???,
-        // McpSchema.METHOD_PROMPT_GET -> ???,
-        // McpSchema.METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED -> ???,
+        McpSchema.METHOD_PROMPT_LIST -> PromptList[F](prompts),
+        McpSchema.METHOD_PROMPT_GET -> PromptGet[F](prompts),
         // Logging Methods
         // McpSchema.METHOD_LOGGING_SET_LEVEL -> ???,
         // McpSchema.METHOD_NOTIFICATION_MESSAGE -> ???,

@@ -312,7 +312,7 @@ object McpSchema:
   final case class ServerCapabilities(
     // experimental: Option[Map[String, Json]],
     // logging: LoggingCapabilities,
-    // prompt: PromptCapabilities,
+    prompt: PromptCapabilities,
     resources: ResourceCapabilities,
     tools:     ToolCapabilities
   )
@@ -394,8 +394,8 @@ object McpSchema:
 
   trait Resource:
     def name:        String
-    def description: String
-    def mimeType:    String
+    def description: Option[String]
+    def mimeType:    Option[String]
 
     private[mcp] def isStatic: Boolean
 
@@ -423,8 +423,8 @@ object McpSchema:
     def apply(
       uri:         String,
       name:        String,
-      description: String,
-      mimeType:    String,
+      description: Option[String],
+      mimeType:    Option[String],
       annotations: Annotations
     ): StaticResource = StaticResource(uri, name, description, mimeType, annotations)
 
@@ -444,8 +444,8 @@ object McpSchema:
   final case class StaticResource(
     uri:         String,
     name:        String,
-    description: String,
-    mimeType:    String,
+    description: Option[String],
+    mimeType:    Option[String],
     annotations: Annotations
   ) extends Resource:
 
@@ -480,8 +480,8 @@ object McpSchema:
   final case class ResourceTemplate(
     uriTemplate: String,
     name:        String,
-    description: String,
-    mimeType:    String,
+    description: Option[String],
+    mimeType:    Option[String],
     annotations: Annotations
   ) extends Resource:
 
@@ -489,7 +489,7 @@ object McpSchema:
 
   object ResourceTemplate:
     given Decoder[ResourceTemplate] = Decoder.derived[ResourceTemplate]
-    given Encoder[ResourceTemplate] = Encoder.derived[ResourceTemplate]
+    given Encoder[ResourceTemplate] = Encoder.derived[ResourceTemplate].mapJson(_.dropNullValues)
 
   final case class ListResourcesResult(
     resources:  List[Resource],
@@ -634,6 +634,11 @@ object McpSchema:
     given Decoder[Prompt] = Decoder.derived[Prompt]
     given Encoder[Prompt] = Encoder.derived[Prompt]
 
+  case class PromptHandler[F[_]](
+    prompt: Prompt,
+    handler: GetPromptRequest => F[GetPromptResult]
+  )
+  
   // ---------------------------
   // Content Types
   // ---------------------------
@@ -728,11 +733,25 @@ object McpSchema:
    */
   final case class ListPromptsResult(
     prompts:    List[Prompt],
-    nextCursor: String
+    nextCursor: Option[String]
   )
   object ListPromptsResult:
     given Decoder[ListPromptsResult] = Decoder.derived[ListPromptsResult]
-    given Encoder[ListPromptsResult] = Encoder.derived[ListPromptsResult]
+    given Encoder[ListPromptsResult] = Encoder.derived[ListPromptsResult].mapJson(_.dropNullValues)
+
+  /**
+   * Used by the client to get a prompt provided by the server.
+   *
+   * @param name      The name of the prompt or prompt template.
+   * @param arguments Arguments to use for templating the prompt.
+   */
+  final case class GetPromptRequest(
+                                     name: String,
+                                     arguments:    Map[String, Json]
+  ) extends Request
+  object GetPromptRequest:
+    given Decoder[GetPromptRequest] = Decoder.derived[GetPromptRequest]
+    given Encoder[GetPromptRequest] = Encoder.derived[GetPromptRequest]
 
   /**
    * The server's response to a prompts/get request from the client.
@@ -740,13 +759,13 @@ object McpSchema:
    * @param description An optional description for the prompt.
    * @param messages    A list of messages to display as part of the prompt.
    */
-  final case class GetPromptRequest(
-    description: String,
-    messages:    List[PromptMessage]
+  final case class GetPromptResult(
+                                    description: Option[String],
+                                    messages: List[PromptMessage]
   )
-  object GetPromptRequest:
-    given Decoder[GetPromptRequest] = Decoder.derived[GetPromptRequest]
-    given Encoder[GetPromptRequest] = Encoder.derived[GetPromptRequest]
+  object GetPromptResult:
+    given Decoder[GetPromptResult] = Decoder.derived[GetPromptResult]
+    given Encoder[GetPromptResult] = Encoder.derived[GetPromptResult].mapJson(_.dropNullValues)
 
   final case class JsonSchema(
     `type`:               String,

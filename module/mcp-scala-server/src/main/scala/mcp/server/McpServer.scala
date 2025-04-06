@@ -20,6 +20,8 @@ trait McpServer[F[_]]:
 
   def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F]
 
+  def addPrompt(prompt: McpSchema.PromptHandler[F]): McpServer[F]
+
   def setCapabilities(capabilities: McpSchema.ServerCapabilities): McpServer[F]
 
   def connect(transport: McpTransport[F]): McpServer[F]
@@ -34,7 +36,12 @@ object McpServer:
 
   def apply[F[_]: Async: LiftIO](name: String, version: String): McpServer[F] = Impl[F](
     McpSchema.Implementation(name, version),
-    McpSchema.ServerCapabilities(McpSchema.ResourceCapabilities(None, None), McpSchema.ToolCapabilities(false)),
+    McpSchema.ServerCapabilities(
+      McpSchema.PromptCapabilities(false),
+      McpSchema.ResourceCapabilities(None, None),
+      McpSchema.ToolCapabilities(false)
+    ),
+    List.empty,
     List.empty,
     List.empty,
     voidTransport
@@ -45,6 +52,7 @@ object McpServer:
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
+    prompts: List[McpSchema.PromptHandler[F]],
     transport:    McpTransport[F]
   ) extends McpServer[F]:
 
@@ -53,6 +61,9 @@ object McpServer:
 
     override def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F] =
       this.copy(resources = resources :+ resource)
+
+    override def addPrompt(prompt: McpSchema.PromptHandler[F]): McpServer[F] =
+      this.copy(prompts = prompts :+ prompt)
 
     override def setCapabilities(capabilities: McpSchema.ServerCapabilities): McpServer[F] =
       this.copy(capabilities = capabilities)
@@ -68,6 +79,7 @@ object McpServer:
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
+    prompts: List[McpSchema.PromptHandler[F]],
     handlers:     Map[McpSchema.Method, RequestHandler[F]]
   ):
 
@@ -75,7 +87,8 @@ object McpServer:
       serverInfo,
       capabilities,
       tools,
-      resources
+      resources,
+      prompts
     )
 
     def addTool[T](tool: McpSchema.Tool[F, T]): FastMcp[F] =
@@ -83,6 +96,9 @@ object McpServer:
 
     def addResource(resource: McpSchema.ResourceHandler[F]): FastMcp[F] =
       this.copy(resources = resources :+ resource)
+
+    def addPrompt(prompt: McpSchema.PromptHandler[F]): FastMcp[F] =
+      this.copy(prompts = prompts :+ prompt)
 
     def setCapabilities(capabilities: McpSchema.ServerCapabilities): FastMcp[F] =
       this.copy(capabilities = capabilities)
@@ -100,12 +116,14 @@ object McpServer:
     def apply[F[_]: Async: LiftIO](name: String, version: String): FastMcp[F] =
       val serverInfo = McpSchema.Implementation(name, version)
       val capabilities = McpSchema.ServerCapabilities(
+        McpSchema.PromptCapabilities(false),
         McpSchema.ResourceCapabilities(None, None),
         McpSchema.ToolCapabilities(false)
       )
       val handleProvider = new RequestHandler.Provider[F](
         serverInfo,
         capabilities,
+        List.empty,
         List.empty,
         List.empty
       )
@@ -114,5 +132,6 @@ object McpServer:
         capabilities,
         List.empty,
         List.empty,
-        handleProvider.handlers
+        List.empty,
+        handleProvider.handlers,
       )
