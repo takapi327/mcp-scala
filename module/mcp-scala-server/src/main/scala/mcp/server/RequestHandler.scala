@@ -14,6 +14,7 @@ import io.circe.*
 import io.circe.syntax.*
 
 import mcp.schema.{ McpError, McpSchema }
+
 import mcp.server.handler.*
 
 trait RequestHandler[F[_]]:
@@ -26,22 +27,22 @@ object RequestHandler:
     serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
-    resources:  List[McpSchema.ResourceHandler[F]]
+    resources:    List[McpSchema.ResourceHandler[F]]
   ):
 
     def handlers: Map[String, RequestHandler[F]] =
       Map(
         // Lifecycle Methods
-        McpSchema.METHOD_INITIALIZE -> Initialize[F](serverInfo, capabilities),
+        McpSchema.METHOD_INITIALIZE               -> Initialize[F](serverInfo, capabilities),
         McpSchema.METHOD_NOTIFICATION_INITIALIZED -> NotificationInitialized[F](),
-        McpSchema.METHOD_PING -> Ping[F](),
+        McpSchema.METHOD_PING                     -> Ping[F](),
         // Tool Methods
         McpSchema.METHOD_TOOLS_LIST -> ListTools[F](serverInfo, capabilities, tools),
         McpSchema.METHOD_TOOLS_CALL -> CallTools[F](serverInfo, capabilities, tools),
         // McpSchema.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED -> ???,
         // Resources Methods
         McpSchema.METHOD_RESOURCES_LIST -> ResourcesList[F](resources),
-        McpSchema.METHOD_RESOURCES_READ -> ResourcesRead[F](resources),
+        McpSchema.METHOD_RESOURCES_READ -> ResourcesRead[F](resources)
         // McpSchema.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED -> ???,
         // McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ???,
         // McpSchema.METHOD_RESOURCES_SUBSCRIBE -> ???,

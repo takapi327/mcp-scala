@@ -19,7 +19,7 @@ trait McpServer[F[_]]:
   def addTool[T](tool: McpSchema.Tool[F, T]): McpServer[F]
 
   def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F]
-  
+
   def setCapabilities(capabilities: McpSchema.ServerCapabilities): McpServer[F]
 
   def connect(transport: McpTransport[F]): McpServer[F]
@@ -44,7 +44,7 @@ object McpServer:
     serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
-    resources:  List[McpSchema.ResourceHandler[F]],
+    resources:    List[McpSchema.ResourceHandler[F]],
     transport:    McpTransport[F]
   ) extends McpServer[F]:
 
@@ -53,7 +53,7 @@ object McpServer:
 
     override def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F] =
       this.copy(resources = resources :+ resource)
-      
+
     override def setCapabilities(capabilities: McpSchema.ServerCapabilities): McpServer[F] =
       this.copy(capabilities = capabilities)
 
@@ -67,7 +67,7 @@ object McpServer:
     serverInfo:   McpSchema.Implementation,
     capabilities: McpSchema.ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
-    resources:  List[McpSchema.ResourceHandler[F]]
+    resources:    List[McpSchema.ResourceHandler[F]]
   ):
 
     private def handleProvider: RequestHandler.Provider[F] = new RequestHandler.Provider[F](

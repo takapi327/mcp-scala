@@ -9,6 +9,7 @@ import cats.effect.*
 import fs2.io.*
 
 import mcp.schema.McpSchema
+
 import mcp.server.McpServer
 
 object StdioMain extends IOApp.Simple:
@@ -23,7 +24,8 @@ object StdioMain extends IOApp.Simple:
     )
     override def readHandler: McpSchema.ReadResourceRequest => IO[McpSchema.ReadResourceResult] =
       request =>
-        file.Files[IO]
+        file
+          .Files[IO]
           .readUtf8(file.Path(resource.uri))
           .compile
           .toList
@@ -36,9 +38,11 @@ object StdioMain extends IOApp.Simple:
   override def run: IO[Unit] =
     McpServer
       .FastMcp[IO]("Documentation Server", "0.1.0")
-      .setCapabilities(McpSchema.ServerCapabilities(
-        McpSchema.ResourceCapabilities(None, None),
-        McpSchema.ToolCapabilities(false)
-      ))
+      .setCapabilities(
+        McpSchema.ServerCapabilities(
+          McpSchema.ResourceCapabilities(None, None),
+          McpSchema.ToolCapabilities(false)
+        )
+      )
       .addResource(resourceHandler)
       .start("stdio")

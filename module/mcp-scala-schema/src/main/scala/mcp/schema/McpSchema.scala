@@ -299,7 +299,7 @@ object McpSchema:
     // logging: LoggingCapabilities,
     // prompt: PromptCapabilities,
     resources: ResourceCapabilities,
-    tools: ToolCapabilities
+    tools:     ToolCapabilities
   )
   object ServerCapabilities:
     given Decoder[ServerCapabilities] = Decoder.derived[ServerCapabilities]
