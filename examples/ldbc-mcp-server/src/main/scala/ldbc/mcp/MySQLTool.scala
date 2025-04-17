@@ -45,7 +45,7 @@ object MySQLTool:
           val records = impl.records.map(_.values)
           val contents = List(
             McpSchema.Content.text(
-              s"Columns: ${ columns.mkString(", ") }\nRecords: ${ records.map(_.mkString(", ")).mkString("\n") }"
+              s"Columns: ${ columns.mkString(", ") }\nRecords: ${ records.map(_.map(_.getOrElse("NULL")).mkString(", ")).mkString("\n") }"
             )
           )
           McpSchema.CallToolResult.success(contents)

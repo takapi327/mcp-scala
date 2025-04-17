@@ -46,9 +46,9 @@ object RequestHandler:
         McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ResourceTemplatesList[F](resources),
         // Prompt Methods
         McpSchema.METHOD_PROMPT_LIST -> PromptList[F](prompts),
-        McpSchema.METHOD_PROMPT_GET  -> PromptGet[F](prompts)
+        McpSchema.METHOD_PROMPT_GET  -> PromptGet[F](prompts),
         // Logging Methods
-        // McpSchema.METHOD_LOGGING_SET_LEVEL -> ???,
+        McpSchema.METHOD_LOGGING_SET_LEVEL -> Ping[F](),
         // McpSchema.METHOD_NOTIFICATION_MESSAGE -> ???,
         // Roots Methods
         // McpSchema.METHOD_ROOTS_LIST -> ???,

@@ -988,27 +988,27 @@ object McpSchema:
     given Decoder[ProgressNotification] = Decoder.derived[ProgressNotification]
     given Encoder[ProgressNotification] = Encoder.derived[ProgressNotification]
 
-  enum LoggingLevel(val code: Int):
-    case DEBUG     extends LoggingLevel(0)
-    case INFO      extends LoggingLevel(1)
-    case NOTICE    extends LoggingLevel(2)
-    case WARNING   extends LoggingLevel(3)
-    case ERROR     extends LoggingLevel(4)
-    case CRITICAL  extends LoggingLevel(5)
-    case ALERT     extends LoggingLevel(6)
-    case EMERGENCY extends LoggingLevel(7)
+  enum LoggingLevel(val code: Int, val name: String):
+    case DEBUG     extends LoggingLevel(0, "debug")
+    case INFO      extends LoggingLevel(1, "info")
+    case NOTICE    extends LoggingLevel(2, "notice")
+    case WARNING   extends LoggingLevel(3, "warning")
+    case ERROR     extends LoggingLevel(4, "error")
+    case CRITICAL  extends LoggingLevel(5, "critical")
+    case ALERT     extends LoggingLevel(6, "alert")
+    case EMERGENCY extends LoggingLevel(7, "emergency")
   object LoggingLevel:
-    given Decoder[LoggingLevel] = Decoder[Int].map {
-      case 0 => LoggingLevel.DEBUG
-      case 1 => LoggingLevel.INFO
-      case 2 => LoggingLevel.NOTICE
-      case 3 => LoggingLevel.WARNING
-      case 4 => LoggingLevel.ERROR
-      case 5 => LoggingLevel.CRITICAL
-      case 6 => LoggingLevel.ALERT
-      case 7 => LoggingLevel.EMERGENCY
+    given Decoder[LoggingLevel] = Decoder[String].map {
+      case "debug" => LoggingLevel.DEBUG
+      case "info"  => LoggingLevel.INFO
+      case "notice" => LoggingLevel.NOTICE
+      case "warning" => LoggingLevel.WARNING
+      case "error" => LoggingLevel.ERROR
+      case "critical" => LoggingLevel.CRITICAL
+      case "alert" => LoggingLevel.ALERT
+      case "emergency" => LoggingLevel.EMERGENCY
     }
-    given Encoder[LoggingLevel] = Encoder[Int].contramap(_.code)
+    given Encoder[LoggingLevel] = Encoder[String].contramap(_.name)
 
   /**
    * The Model Context Protocol (MCP) provides a standardized way for servers to send
