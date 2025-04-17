@@ -10,11 +10,11 @@ import cats.effect.*
 
 import io.circe.*
 
-import mcp.schema.McpSchema
+import mcp.schema.*
 
 import ldbc.connector.*
 
-case class MySQLTool(sql: String)
+case class MySQLTool(@Description("検索を行うクエリ文") sql: String) derives JsonSchema
 object MySQLTool:
   given Decoder[MySQLTool] = Decoder.derived[MySQLTool]
   given Encoder[MySQLTool] = Encoder.derived[MySQLTool]
@@ -26,14 +26,6 @@ object MySQLTool:
   def tool: McpSchema.Tool[IO, MySQLTool] = McpSchema.Tool[IO, MySQLTool](
     "MySQL",
     "MySQL Connector",
-    McpSchema.JsonSchema(
-      "object",
-      Map(
-        "sql" -> Json.obj("type" -> Json.fromString("string"))
-      ),
-      List("sql"),
-      false
-    ),
     request =>
       provider.use { connection =>
         for
