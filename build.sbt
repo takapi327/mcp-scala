@@ -32,6 +32,11 @@ lazy val schema = crossProject(JVMPlatform, JSPlatform, NativePlatform)
       "io.circe" %%% "circe-parser"  % "0.14.8"
     )
   )
+  .platformsSettings(JSPlatform, NativePlatform)(
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
+    )
+  )
 
 lazy val server = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .crossType(CrossType.Pure)
