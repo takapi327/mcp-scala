@@ -767,43 +767,25 @@ object McpSchema:
     given Decoder[GetPromptResult] = Decoder.derived[GetPromptResult]
     given Encoder[GetPromptResult] = Encoder.derived[GetPromptResult].mapJson(_.dropNullValues)
 
-  final case class JsonSchema(
-    `type`:               String,
-    properties:           Map[String, Json],
-    required:             List[String],
-    additionalProperties: Boolean
-  )
-  object JsonSchema:
-    given Decoder[JsonSchema] = Decoder.derived[JsonSchema]
-    given Encoder[JsonSchema] = Encoder.derived[JsonSchema]
-
   trait ToolSchema:
     def name: String
 
     def description: String
 
-    def inputSchema: JsonSchema
+    def inputSchema: Json
 
   object ToolSchema:
     case class Static(
       name:        String,
       description: String,
-      inputSchema: JsonSchema
+      inputSchema: Json
     ) extends ToolSchema
-
-    given Decoder[ToolSchema] = Decoder.instance { c =>
-      for {
-        name        <- c.get[String]("name")
-        description <- c.get[String]("description")
-        inputSchema <- c.get[JsonSchema]("inputSchema")
-      } yield Static(name, description, inputSchema)
-    }
 
     given Encoder[ToolSchema] = Encoder.instance { tool =>
       Json.obj(
         "name"        -> Json.fromString(tool.name),
         "description" -> Json.fromString(tool.description),
-        "inputSchema" -> tool.inputSchema.asJson
+        "inputSchema" -> tool.inputSchema
       )
     }
 
@@ -817,18 +799,13 @@ object McpSchema:
    * @param description A human-readable description of what the tool does. This can be
    *                    used by clients to improve the LLM's understanding of available tools.
    */
-  final case class Tool[F[_], T: Decoder: Encoder](
+  final case class Tool[F[_], T: JsonSchema: Decoder](
     name:        String,
     description: String,
-    inputSchema: JsonSchema,
     execute:     T => F[CallToolResult]
   ) extends ToolSchema:
 
-    private[mcp] def schema: ToolSchema = ToolSchema.Static(
-      name,
-      description,
-      inputSchema
-    )
+    override def inputSchema: Json = summon[JsonSchema[T]].asJson
 
     def decode(arguments: Json): Decoder.Result[T] =
       summon[Decoder[T]].decodeJson(arguments)
@@ -848,7 +825,6 @@ object McpSchema:
     nextCursor: Option[String]
   )
   object ListToolsResult:
-    given Decoder[ListToolsResult] = Decoder.derived[ListToolsResult]
     given Encoder[ListToolsResult] = Encoder.derived[ListToolsResult].mapJson(_.dropNullValues)
 
   /**

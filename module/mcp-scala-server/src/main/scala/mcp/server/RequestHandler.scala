@@ -121,6 +121,7 @@ object RequestHandler:
           tools.find(_.name == callToolRequest.name) match
             case None => Async[F].pure(Left(McpError(s"Tool not found: ${ callToolRequest.name }")))
             case Some(tool) =>
-              tool.decode(callToolRequest.arguments) match
+              tool.
+                decode(callToolRequest.arguments) match
                 case Left(error)  => Async[F].pure(Left(error))
                 case Right(value) => tool.execute(value).map(v => Right(v.asJson))
