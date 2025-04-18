@@ -6,13 +6,13 @@
 
 package mcp.schema
 
+import java.math.{ BigDecimal as JBigDecimal, BigInteger as JBigInteger }
 import java.time.*
-import java.util.{Date, UUID}
-import java.math.{BigDecimal as JBigDecimal, BigInteger as JBigInteger}
+import java.util.{ Date, UUID }
 
+import scala.annotation.StaticAnnotation
 import scala.concurrent.duration.Duration as ScalaDuration
 import scala.quoted.*
-import scala.annotation.StaticAnnotation
 
 import io.circe.*
 import io.circe.syntax.*
@@ -20,10 +20,10 @@ import io.circe.syntax.*
 import SchemaType.*
 
 trait JsonSchema[A]:
-  def schemaType: SchemaType[A]
-  def title: Option[String]
+  def schemaType:  SchemaType[A]
+  def title:       Option[String]
   def description: Option[String]
-  def isOptional: Boolean
+  def isOptional:  Boolean
 
   def thisType: String
 
@@ -44,33 +44,41 @@ case class Description(name: String) extends StaticAnnotation
 
 object JsonSchema:
 
-  given [A]: Encoder[JsonSchema[A]] = Encoder.instance {
-    schema =>
-      schema.schemaType match
-        case entity: Entity[?] =>
-          Json.obj(
+  given [A]: Encoder[JsonSchema[A]] = Encoder.instance { schema =>
+    schema.schemaType match
+      case entity: Entity[?] =>
+        Json
+          .obj(
             "type" -> Json.fromString(entity.toString),
             "properties" -> Json.obj(
               entity.fields.map { field =>
-                field.name -> field.schema.schemaType.asJson.deepMerge(
-                  Json.obj("description" -> field.description.asJson),
-                ).dropNullValues.dropEmptyValues
-              }*,
+                field.name -> field.schema.schemaType.asJson
+                  .deepMerge(
+                    Json.obj("description" -> field.description.asJson)
+                  )
+                  .dropNullValues
+                  .dropEmptyValues
+              }*
             ),
             "required" -> Json.arr(
               entity.required.map(Json.fromString)*
             ),
-            "additionalProperties" -> Json.fromBoolean(false),
-          ).dropNullValues.dropEmptyValues
-        case other =>
-          Json.obj(
-            "type" -> Json.fromString(other.toString),
-            "title" -> schema.title.asJson,
+            "additionalProperties" -> Json.fromBoolean(false)
+          )
+          .dropNullValues
+          .dropEmptyValues
+      case other =>
+        Json
+          .obj(
+            "type"        -> Json.fromString(other.toString),
+            "title"       -> schema.title.asJson,
             "description" -> schema.description.asJson,
-            "properties" -> Json.obj(),
-            "required" -> Json.arr(),
-            "isOptional" -> Json.fromBoolean(schema.isOptional)
-          ).dropNullValues.dropEmptyValues
+            "properties"  -> Json.obj(),
+            "required"    -> Json.arr(),
+            "isOptional"  -> Json.fromBoolean(schema.isOptional)
+          )
+          .dropNullValues
+          .dropEmptyValues
   }
 
   def apply[A](schemaType: SchemaType[A]): JsonSchema[A] =
@@ -83,17 +91,17 @@ object JsonSchema:
     Impl(schemaType, None, None, isOptional)
 
   def apply[A](
-                schemaType: SchemaType[A],
-                title: Option[String],
-                format: Option[String],
-                isOptional: Boolean
-              ): JsonSchema[A] = Impl(schemaType, title, format, isOptional)
+    schemaType: SchemaType[A],
+    title:      Option[String],
+    format:     Option[String],
+    isOptional: Boolean
+  ): JsonSchema[A] = Impl(schemaType, title, format, isOptional)
 
   private case class Impl[A](
-    schemaType: SchemaType[A],
-    title: Option[String],
+    schemaType:  SchemaType[A],
+    title:       Option[String],
     description: Option[String],
-    isOptional: Boolean
+    isOptional:  Boolean
   ) extends JsonSchema[A]:
     override def thisType: String = schemaType.toString
 
@@ -104,43 +112,43 @@ object JsonSchema:
     override def asIterable[C[X] <: Iterable[X]]: JsonSchema[C[A]] =
       copy(schemaType = SArray(this), isOptional = true)
 
-  given JsonSchema[String] = JsonSchema(SString())
-  given JsonSchema[Byte] = JsonSchema(SInteger())
-  given JsonSchema[Short] = JsonSchema(SInteger())
-  given JsonSchema[Int] = JsonSchema(SInteger[Int]())
-  given JsonSchema[Long] = JsonSchema(SInteger[Long]())
-  given JsonSchema[Float] = JsonSchema(SNumber[Float]())
-  given JsonSchema[Double] = JsonSchema(SNumber[Double]())
-  given JsonSchema[Boolean] = JsonSchema(SBoolean())
-  given JsonSchema[Array[Byte]] = JsonSchema(SBinary())
-  given JsonSchema[Instant] = JsonSchema(SBinary())
-  given JsonSchema[ZonedDateTime] = JsonSchema(SDateTime())
+  given JsonSchema[String]         = JsonSchema(SString())
+  given JsonSchema[Byte]           = JsonSchema(SInteger())
+  given JsonSchema[Short]          = JsonSchema(SInteger())
+  given JsonSchema[Int]            = JsonSchema(SInteger[Int]())
+  given JsonSchema[Long]           = JsonSchema(SInteger[Long]())
+  given JsonSchema[Float]          = JsonSchema(SNumber[Float]())
+  given JsonSchema[Double]         = JsonSchema(SNumber[Double]())
+  given JsonSchema[Boolean]        = JsonSchema(SBoolean())
+  given JsonSchema[Array[Byte]]    = JsonSchema(SBinary())
+  given JsonSchema[Instant]        = JsonSchema(SBinary())
+  given JsonSchema[ZonedDateTime]  = JsonSchema(SDateTime())
   given JsonSchema[OffsetDateTime] = JsonSchema(SDateTime())
-  given JsonSchema[Date] = JsonSchema(SDate())
-  given JsonSchema[LocalDateTime] = JsonSchema(SString())
-  given JsonSchema[LocalDate] = JsonSchema(SDate())
-  given JsonSchema[ZoneOffset] = JsonSchema(SString())
-  given JsonSchema[Duration] = JsonSchema(SString())
-  given JsonSchema[LocalTime] = JsonSchema(SString())
-  given JsonSchema[OffsetTime] = JsonSchema(SString())
-  given JsonSchema[ScalaDuration] = JsonSchema(SString())
-  given JsonSchema[UUID] = JsonSchema(SString[UUID]())
-  given JsonSchema[BigDecimal] = JsonSchema(SNumber())
-  given JsonSchema[JBigDecimal] = JsonSchema(SNumber())
-  given JsonSchema[BigInt] = JsonSchema(SInteger())
-  given JsonSchema[JBigInteger] = JsonSchema(SInteger())
-  given JsonSchema[Unit] = JsonSchema(Entity.empty)
+  given JsonSchema[Date]           = JsonSchema(SDate())
+  given JsonSchema[LocalDateTime]  = JsonSchema(SString())
+  given JsonSchema[LocalDate]      = JsonSchema(SDate())
+  given JsonSchema[ZoneOffset]     = JsonSchema(SString())
+  given JsonSchema[Duration]       = JsonSchema(SString())
+  given JsonSchema[LocalTime]      = JsonSchema(SString())
+  given JsonSchema[OffsetTime]     = JsonSchema(SString())
+  given JsonSchema[ScalaDuration]  = JsonSchema(SString())
+  given JsonSchema[UUID]           = JsonSchema(SString[UUID]())
+  given JsonSchema[BigDecimal]     = JsonSchema(SNumber())
+  given JsonSchema[JBigDecimal]    = JsonSchema(SNumber())
+  given JsonSchema[BigInt]         = JsonSchema(SInteger())
+  given JsonSchema[JBigInteger]    = JsonSchema(SInteger())
+  given JsonSchema[Unit]           = JsonSchema(Entity.empty)
 
-  given [A: JsonSchema]: JsonSchema[Option[A]] = summon[JsonSchema[A]].asOption
-  given [A: JsonSchema]: JsonSchema[Array[A]] = summon[JsonSchema[A]].asArray
-  given [A: JsonSchema, C[X] <: Iterable[X]]: JsonSchema[C[A]] = summon[JsonSchema[A]].asIterable[C]
+  given [A: JsonSchema]:                      JsonSchema[Option[A]] = summon[JsonSchema[A]].asOption
+  given [A: JsonSchema]:                      JsonSchema[Array[A]]  = summon[JsonSchema[A]].asArray
+  given [A: JsonSchema, C[X] <: Iterable[X]]: JsonSchema[C[A]]      = summon[JsonSchema[A]].asIterable[C]
 
   inline def derived[P <: Product]: JsonSchema[P] = ${ derivedImpl[P] }
 
   private def derivedImpl[P <: Product](using
-                                        quotes: Quotes,
-                                        tpe: Type[P]
-                                       ): Expr[JsonSchema[P]] =
+    quotes: Quotes,
+    tpe:    Type[P]
+  ): Expr[JsonSchema[P]] =
 
     import quotes.reflect.*
 
@@ -152,7 +160,7 @@ object JsonSchema:
       .collect {
         case sym if sym.hasAnnotation(annot) =>
           val annotExpr = sym.getAnnotation(annot).get.asExprOf[Description]
-          val name = Expr(sym.name)
+          val name      = Expr(sym.name)
           '{ ($name, Some($annotExpr.name)) }
         case sym =>
           val name = Expr(sym.name)
@@ -180,8 +188,8 @@ object JsonSchema:
         .map {
           case (label: (String, Option[String]), schema: JsonSchema[t]) =>
             Entity.Field[t](
-              _name = label._1,
-              _schema = schema,
+              _name        = label._1,
+              _schema      = schema,
               _description = label._2
             )
         }
@@ -191,8 +199,8 @@ object JsonSchema:
     '{
       JsonSchema[P](
         schemaType = Entity($fields),
-        title = Some(${ Expr(symbol.name) }),
-        format = None,
+        title      = Some(${ Expr(symbol.name) }),
+        format     = None,
         isOptional = false
       )
     }

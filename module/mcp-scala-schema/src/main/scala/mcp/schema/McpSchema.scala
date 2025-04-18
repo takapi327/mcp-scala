@@ -975,13 +975,13 @@ object McpSchema:
     case EMERGENCY extends LoggingLevel(7, "emergency")
   object LoggingLevel:
     given Decoder[LoggingLevel] = Decoder[String].map {
-      case "debug" => LoggingLevel.DEBUG
-      case "info"  => LoggingLevel.INFO
-      case "notice" => LoggingLevel.NOTICE
-      case "warning" => LoggingLevel.WARNING
-      case "error" => LoggingLevel.ERROR
-      case "critical" => LoggingLevel.CRITICAL
-      case "alert" => LoggingLevel.ALERT
+      case "debug"     => LoggingLevel.DEBUG
+      case "info"      => LoggingLevel.INFO
+      case "notice"    => LoggingLevel.NOTICE
+      case "warning"   => LoggingLevel.WARNING
+      case "error"     => LoggingLevel.ERROR
+      case "critical"  => LoggingLevel.CRITICAL
+      case "alert"     => LoggingLevel.ALERT
       case "emergency" => LoggingLevel.EMERGENCY
     }
     given Encoder[LoggingLevel] = Encoder[String].contramap(_.name)

@@ -48,7 +48,7 @@ object RequestHandler:
         McpSchema.METHOD_PROMPT_LIST -> PromptList[F](prompts),
         McpSchema.METHOD_PROMPT_GET  -> PromptGet[F](prompts),
         // Logging Methods
-        McpSchema.METHOD_LOGGING_SET_LEVEL -> Ping[F](),
+        McpSchema.METHOD_LOGGING_SET_LEVEL -> Ping[F]()
         // McpSchema.METHOD_NOTIFICATION_MESSAGE -> ???,
         // Roots Methods
         // McpSchema.METHOD_ROOTS_LIST -> ???,
@@ -121,7 +121,6 @@ object RequestHandler:
           tools.find(_.name == callToolRequest.name) match
             case None => Async[F].pure(Left(McpError(s"Tool not found: ${ callToolRequest.name }")))
             case Some(tool) =>
-              tool.
-                decode(callToolRequest.arguments) match
+              tool.decode(callToolRequest.arguments) match
                 case Left(error)  => Async[F].pure(Left(error))
                 case Right(value) => tool.execute(value).map(v => Right(v.asJson))
