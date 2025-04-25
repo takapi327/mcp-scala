@@ -107,10 +107,10 @@ object JsonSchema:
 
     override def asOption: JsonSchema[Option[A]] = copy(schemaType = SOption(this), isOptional = true)
 
-    override def asArray: JsonSchema[Array[A]] = copy(schemaType = SArray(this), isOptional = true)
+    override def asArray: JsonSchema[Array[A]] = copy(schemaType = SArray(this), isOptional = false)
 
     override def asIterable[C[X] <: Iterable[X]]: JsonSchema[C[A]] =
-      copy(schemaType = SArray(this), isOptional = true)
+      copy(schemaType = SArray(this), isOptional = false)
 
   given JsonSchema[String]         = JsonSchema(SString())
   given JsonSchema[Byte]           = JsonSchema(SInteger())

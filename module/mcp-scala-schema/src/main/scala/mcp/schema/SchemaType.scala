@@ -27,9 +27,7 @@ object SchemaType:
     case SArray(element) =>
       Json.obj(
         "type" -> Json.fromString("array"),
-        "items" -> Json.obj(
-          "properties" -> element.asJson
-        )
+        "items" -> element.asJson
       )
     case Entity(fields) =>
       Json.obj(
