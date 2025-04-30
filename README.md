@@ -1,5 +1,8 @@
 # MCP (Model Context Protocol) for Scala 3
 
+> [!CAUTION]
+> **mcp-scala** is currently under active development. Please note that current functionality may therefore be deprecated or changed in the future.
+
 ## Usage
 
 ```scala 3

@@ -26,7 +26,7 @@ object SchemaType:
     case SOption(element) => element.asJson
     case SArray(element) =>
       Json.obj(
-        "type" -> Json.fromString("array"),
+        "type"  -> Json.fromString("array"),
         "items" -> element.asJson
       )
     case Entity(fields) =>
