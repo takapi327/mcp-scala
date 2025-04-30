@@ -64,6 +64,7 @@ lazy val client = crossProject(JVMPlatform, JSPlatform, NativePlatform)
     )
   )
   .dependsOn(schema)
+  .enablePlugins(NoPublishPlugin)
 
 lazy val ldbcMcpServerExample = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .crossType(CrossType.Pure)
