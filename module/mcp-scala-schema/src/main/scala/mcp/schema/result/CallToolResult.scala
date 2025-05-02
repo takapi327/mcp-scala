@@ -24,9 +24,9 @@ import mcp.schema.McpSchema.Content
  * should be reported as an MCP error response.
  */
 final case class CallToolResult(
-                                 content: List[Content],
-                                 isError: Option[Boolean]
-                               ) extends Result
+  content: List[Content],
+  isError: Option[Boolean]
+) extends Result
 
 object CallToolResult:
   given Decoder[CallToolResult] = Decoder.derived[CallToolResult]

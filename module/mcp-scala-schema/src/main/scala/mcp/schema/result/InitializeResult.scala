@@ -9,20 +9,17 @@ package result
 
 import io.circe.*
 
-import mcp.schema.McpSchema.{
-  Implementation,
-  ServerCapabilities,
-}
+import mcp.schema.McpSchema.{ Implementation, ServerCapabilities }
 
 /**
  * After receiving an initialize request from the client, the server sends this response.
  */
 final case class InitializeResult(
-                                   protocolVersion: String,
-                                   capabilities: ServerCapabilities,
-                                   serverInfo: Implementation,
-                                   instructions: Option[String]
-                                 ) extends Result
+  protocolVersion: String,
+  capabilities:    ServerCapabilities,
+  serverInfo:      Implementation,
+  instructions:    Option[String]
+) extends Result
 
 object InitializeResult:
   given Decoder[InitializeResult] = Decoder.derived[InitializeResult]

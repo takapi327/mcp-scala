@@ -18,8 +18,8 @@ final case class CompleteResult(values: List[String], total: Option[Int], hasMor
 object CompleteResult:
   given Decoder[CompleteResult] = Decoder.instance { cursor =>
     for {
-      values <- cursor.get[List[String]]("completion.values")
-      total <- cursor.get[Option[Int]]("completion.total")
+      values  <- cursor.get[List[String]]("completion.values")
+      total   <- cursor.get[Option[Int]]("completion.total")
       hasMore <- cursor.get[Option[Boolean]]("completion.hasMore")
     } yield CompleteResult(values, total, hasMore)
   }
@@ -28,8 +28,8 @@ object CompleteResult:
     Json
       .obj(
         "completion" -> Json.obj(
-          "values" -> result.values.asJson,
-          "total" -> result.total.asJson,
+          "values"  -> result.values.asJson,
+          "total"   -> result.total.asJson,
           "hasMore" -> result.hasMore.asJson
         )
       )

@@ -9,7 +9,7 @@ package mcp.schema
 package object result:
 
   trait Result
-  
+
   object Result:
 
     /**
