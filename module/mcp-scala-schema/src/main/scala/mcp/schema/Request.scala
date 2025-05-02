@@ -22,27 +22,6 @@ import mcp.schema.request.*
 object Request:
 
   /**
-   * Sent from the client to request resources/updated notifications from the server whenever a particular resource changes.
-   */
-  final case class SubscribeRequest(uri: String) extends Request:
-    override def method: Method = Method.METHOD_RESOURCES_SUBSCRIBE
-  object SubscribeRequest:
-    given Decoder[SubscribeRequest] = Decoder.instance { cursor =>
-      for {
-        uri <- cursor.get[String]("uri")
-      } yield SubscribeRequest(uri)
-    }
-
-    given Encoder[SubscribeRequest] = Encoder.instance { subscribe =>
-      Json.obj(
-        "method" -> subscribe.method.asJson,
-        "params" -> Json.obj(
-          "uri" -> subscribe.uri.asJson
-        )
-      )
-    }
-
-  /**
    * Sent from the client to request cancellation of resources/updated notifications from the server. This should follow a previous resources/subscribe request.
    */
   final case class UnsubscribeRequest(uri: String) extends Request:
