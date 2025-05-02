@@ -22,29 +22,6 @@ import mcp.schema.request.*
 object Request:
 
   /**
-   * A request from the client to the server, to enable or adjust logging.
-   */
-  final case class SetLevelRequest(level: LoggingLevel) extends Request:
-    override def method: Method = Method.METHOD_LOGGING_SET_LEVEL
-  object SetLevelRequest:
-    given Decoder[SetLevelRequest] = Decoder.instance { cursor =>
-      for {
-        level <- cursor.get[LoggingLevel]("level")
-      } yield SetLevelRequest(level)
-    }
-
-    given Encoder[SetLevelRequest] = Encoder.instance { set =>
-      Json
-        .obj(
-          "method" -> set.method.asJson,
-          "params" -> Json.obj(
-            "level" -> set.level.asJson
-          )
-        )
-        .dropNullValues
-    }
-
-  /**
    * A request from the server to sample an LLM via the client. The client has full discretion over which model to select. The client should also inform the user before beginning sampling, to allow them to inspect the request (human in the loop) and decide whether to approve it.
    */
   final case class CreateMessageRequest(
