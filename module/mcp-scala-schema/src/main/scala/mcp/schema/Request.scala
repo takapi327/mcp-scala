@@ -21,27 +21,6 @@ import mcp.schema.request.*
 
 object Request:
 
-  /**
-   * Sent from the client to request a list of tools the server has.
-   */
-  final case class ListToolsRequest(cursor: Option[Cursor]) extends PaginatedRequest:
-    override def method: Method = Method.METHOD_TOOLS_LIST
-  object ListToolsRequest:
-    given Decoder[ListToolsRequest] = Decoder.instance { cursor =>
-      for {
-        cursor <- cursor.get[Option[Cursor]]("cursor")
-      } yield ListToolsRequest(cursor)
-    }
-
-    given Encoder[ListToolsRequest] = Encoder.instance { list =>
-      Json
-        .obj(
-          "method" -> list.method.asJson,
-          "cursor" -> list.cursor.asJson
-        )
-        .dropNullValues
-    }
-
   final case class CallToolRequest(name: String, arguments: Option[Json]) extends Request:
     override def method: Method = Method.METHOD_TOOLS_CALL
   object CallToolRequest:
