@@ -21,24 +21,6 @@ import mcp.schema.request.*
 
 object Request:
 
-  final case class ListPromptsRequest(cursor: Option[Cursor]) extends PaginatedRequest:
-    override def method: Method = Method.METHOD_PROMPT_LIST
-  object ListPromptsRequest:
-    given Decoder[ListPromptsRequest] = Decoder.instance { cursor =>
-      for {
-        cursor <- cursor.get[Option[Cursor]]("cursor")
-      } yield ListPromptsRequest(cursor)
-    }
-
-    given Encoder[ListPromptsRequest] = Encoder.instance { list =>
-      Json
-        .obj(
-          "method" -> list.method.asJson,
-          "cursor" -> list.cursor.asJson
-        )
-        .dropNullValues
-    }
-
   /**
    * Used by the client to get a prompt provided by the server.
    */
