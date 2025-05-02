@@ -21,27 +21,6 @@ import mcp.schema.request.*
 
 object Request:
 
-  /**
-   * Sent from the client to request cancellation of resources/updated notifications from the server. This should follow a previous resources/subscribe request.
-   */
-  final case class UnsubscribeRequest(uri: String) extends Request:
-    override def method: Method = Method.METHOD_RESOURCES_UNSUBSCRIBE
-  object UnsubscribeRequest:
-    given Decoder[UnsubscribeRequest] = Decoder.instance { cursor =>
-      for {
-        uri <- cursor.get[String]("uri")
-      } yield UnsubscribeRequest(uri)
-    }
-
-    given Encoder[UnsubscribeRequest] = Encoder.instance { unsubscribe =>
-      Json.obj(
-        "method" -> unsubscribe.method.asJson,
-        "params" -> Json.obj(
-          "uri" -> unsubscribe.uri.asJson
-        )
-      )
-    }
-
   final case class ListPromptsRequest(cursor: Option[Cursor]) extends PaginatedRequest:
     override def method: Method = Method.METHOD_PROMPT_LIST
   object ListPromptsRequest:
