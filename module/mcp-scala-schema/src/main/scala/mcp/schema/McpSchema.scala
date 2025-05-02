@@ -17,222 +17,7 @@ import io.circe.syntax.*
  *
  * @see https://github.com/modelcontextprotocol/java-sdk/blob/79ec5b5ed1cc1a7abf2edda313a81875bd75ad86/mcp/src/main/java/io/modelcontextprotocol/spec/McpSchema.java
  */
-class McpSchema
-
 object McpSchema:
-
-  val LATEST_PROTOCOL_VERSION: String = "2024-11-05"
-
-  val JSONRPC_VERSION: String = "2.0"
-
-  opaque type Method = String
-  object Method:
-
-    def apply(value:   String): Method = value
-    def unapply(value: Method): String = value
-
-    extension (value: Method) def asString: String = value
-
-    given Decoder[Method] = Decoder.instance { cursor =>
-      cursor.as[String].map(Method.apply)
-    }
-    given Encoder[Method] = Encoder.instance { value =>
-      Json.fromString(Method.unapply(value))
-    }
-
-  // ---------------------------
-  // Method Names
-  // ---------------------------
-
-  // Lifecycle Methods
-  val METHOD_INITIALIZE:               Method = "initialize"
-  val METHOD_NOTIFICATION_INITIALIZED: Method = "notifications/initialized"
-  val METHOD_PING:                     Method = "ping"
-
-  // Tool Methods
-  val METHOD_TOOLS_LIST:                      Method = "tools/list"
-  val METHOD_TOOLS_CALL:                      Method = "tools/call"
-  val METHOD_NOTIFICATION_TOOLS_LIST_CHANGED: Method = "notifications/tools/list_changed"
-
-  // Resources Methods
-  val METHOD_RESOURCES_LIST:                      Method = "resources/list"
-  val METHOD_RESOURCES_READ:                      Method = "resources/read"
-  val METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED: Method = "notifications/resources/list_changed"
-  val METHOD_RESOURCES_TEMPLATES_LIST:            Method = "resources/templates/list"
-  val METHOD_RESOURCES_SUBSCRIBE:                 Method = "resources/subscribe"
-  val METHOD_RESOURCES_UNSUBSCRIBE:               Method = "resources/unsubscribe"
-
-  // Prompt Methods
-  val METHOD_PROMPT_LIST:                       Method = "prompts/list"
-  val METHOD_PROMPT_GET:                        Method = "prompts/get"
-  val METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED: Method = "notifications/prompts/list_changed"
-
-  // Logging Methods
-  val METHOD_LOGGING_SET_LEVEL:    Method = "logging/setLevel"
-  val METHOD_NOTIFICATION_MESSAGE: Method = "notifications/message"
-
-  // Roots Methods
-  val METHOD_ROOTS_LIST:                      Method = "roots/list"
-  val METHOD_NOTIFICATION_ROOTS_LIST_CHANGED: Method = "notifications/roots/list_changed"
-
-  // Sampling Methods
-  val METHOD_SAMPLING_CREATE_MESSAGE: Method = "sampling/createMessage"
-
-  // ---------------------------
-  // JSON-RPC Error Codes
-  // ---------------------------
-  /**
-   * Standard error codes used in MCP JSON-RPC responses.
-   */
-  object ErrorCodes:
-    /**
-     * Invalid JSON was received by the server.
-     */
-    val PARSE_ERROR: Int = -32700
-
-    /**
-     * The JSON sent is not a valid Request object.
-     */
-    val INVALID_REQUEST: Int = -32600
-
-    /**
-     * The method does not exist / is not available.
-     */
-    val METHOD_NOT_FOUND: Int = -32601
-
-    /**
-     * Invalid method parameter(s).
-     */
-    val INVALID_PARAMS: Int = -32602
-
-    /**
-     * Internal JSON-RPC error.
-     */
-    val INTERNAL_ERROR: Int = -32603
-
-  sealed trait JSONRPCMessage:
-
-    def jsonrpc: String
-
-  object JSONRPCMessage:
-    // @see: https://github.com/modelcontextprotocol/java-sdk/blob/79ec5b5ed1cc1a7abf2edda313a81875bd75ad86/mcp/src/main/java/io/modelcontextprotocol/spec/McpSchema.java#L149
-    given Decoder[JSONRPCMessage] = Decoder.instance { cursor =>
-      for
-        methodOpt <- cursor.get[Option[String]]("method")
-        idCursor = cursor.downField("id")
-        resultOpt <- cursor.get[Option[Json]]("result")
-        errorOpt  <- cursor.get[Option[JSONRPCError]]("error")
-        decoded <- (methodOpt, idCursor.focus.isDefined) match
-                     case (Some(method), true) =>
-                       cursor.as[JSONRPCRequest]
-                     case (Some(method), false) =>
-                       cursor.as[JSONRPCNotification]
-                     case _ =>
-                       if resultOpt.isDefined || errorOpt.isDefined then cursor.as[JSONRPCResponse]
-                       else Left(DecodingFailure("Invalid JSON-RPC message", cursor.history))
-      yield decoded
-    }
-
-    given Encoder[JSONRPCMessage] = Encoder.instance {
-      case request: JSONRPCRequest           => request.asJson
-      case notification: JSONRPCNotification => notification.asJson
-      case batch: JSONRPCBatch               => batch.asJson
-      case response: JSONRPCResponse         => response.asJson
-    }
-
-  final case class JSONRPCRequest(
-    jsonrpc: String,
-    method:  Method,
-    id:      JSONRPCRequest.Id,
-    params:  Option[Json]
-  ) extends JSONRPCMessage
-
-  object JSONRPCRequest:
-    enum Id:
-      case StringId(value: String)
-      case NumberId(value: BigDecimal)
-      case NullId
-    object Id:
-      given Decoder[Id] = Decoder.instance { cursor =>
-        cursor.focus match
-          case Some(Json.Null) => Right(Id.NullId)
-          case Some(json) if json.isString =>
-            json.asString
-              .map(Id.StringId.apply)
-              .toRight(DecodingFailure("Expected string", cursor.history))
-          case Some(json) if json.isNumber =>
-            json.asNumber
-              .flatMap(_.toBigDecimal)
-              .map(Id.NumberId.apply)
-              .toRight(DecodingFailure("Expected number", cursor.history))
-          case _ =>
-            Left(
-              DecodingFailure("Invalid JSON-RPC request ID", cursor.history)
-            )
-      }
-
-      given Encoder[Id] = Encoder.instance {
-        case Id.StringId(value) => Json.fromString(value)
-        case Id.NumberId(value) => Json.fromBigDecimal(value)
-        case Id.NullId          => Json.Null
-      }
-
-    given Decoder[JSONRPCRequest] = Decoder.derived[JSONRPCRequest]
-    given Encoder[JSONRPCRequest] = Encoder.derived[JSONRPCRequest]
-
-  final case class JSONRPCNotification(
-    jsonrpc: String,
-    method:  Method,
-    params:  Option[Json]
-  ) extends JSONRPCMessage
-
-  object JSONRPCNotification:
-    given Decoder[JSONRPCNotification] = Decoder.derived[JSONRPCNotification]
-    given Encoder[JSONRPCNotification] = Encoder.derived[JSONRPCNotification]
-
-  final case class JSONRPCBatch(
-    jsonrpc:  String,
-    requests: List[JSONRPCMessage]
-  ) extends JSONRPCMessage
-
-  object JSONRPCBatch:
-    given Decoder[JSONRPCBatch] = Decoder.derived[JSONRPCBatch]
-    given Encoder[JSONRPCBatch] = Encoder.derived[JSONRPCBatch]
-
-  final case class JSONRPCError(
-    code:    Int,
-    message: String,
-    data:    Option[Json]
-  )
-
-  object JSONRPCError:
-    given Decoder[JSONRPCError] = Decoder.derived[JSONRPCError]
-    given Encoder[JSONRPCError] = Encoder.derived[JSONRPCError]
-
-  final case class JSONRPCResponse(
-    jsonrpc: String,
-    id:      JSONRPCRequest.Id,
-    result:  Option[Json],
-    error:   Option[JSONRPCError]
-  ) extends JSONRPCMessage
-
-  object JSONRPCResponse:
-    // Encoder/Decoderともにnullは除外
-    given Decoder[JSONRPCResponse] = Decoder.derived[JSONRPCResponse]
-    given Encoder[JSONRPCResponse] = Encoder.derived[JSONRPCResponse].mapJson(_.dropNullValues)
-
-    def apply(
-      id:     JSONRPCRequest.Id,
-      result: Option[Json],
-      error:  Option[JSONRPCError]
-    ): JSONRPCResponse = JSONRPCResponse(JSONRPC_VERSION, id, result, error)
-
-    def failure(id: JSONRPCRequest.Id, error: JSONRPCError): JSONRPCResponse = this.apply(id, None, Some(error))
-    def failure(error: JSONRPCError):                    JSONRPCResponse = this.failure(JSONRPCRequest.Id.NullId, error)
-    def success(id:    JSONRPCRequest.Id, result: Json): JSONRPCResponse = this.apply(id, Some(result), None)
-
-  sealed trait Request
-
   /**
    * Provides a standardized way for servers to request LLM
    * sampling ("completions" or "generations") from language
@@ -340,28 +125,6 @@ object McpSchema:
       case Role.ASSISTANT => "assistant"
     }
 
-  // ---------------------------
-  // Initialization
-  // ---------------------------
-  final case class InitializeRequest(
-    protocolVersion: String,
-    capabilities:    ClientCapabilities,
-    clientInfo:      Implementation
-  ) extends Request
-  object InitializeRequest:
-    given Decoder[InitializeRequest] = Decoder.derived[InitializeRequest]
-    given Encoder[InitializeRequest] = Encoder.derived[InitializeRequest]
-
-  final case class InitializeResult(
-    protocolVersion: String,
-    capabilities:    ServerCapabilities,
-    serverInfo:      Implementation,
-    instructions:    Option[String]
-  )
-  object InitializeResult:
-    given Decoder[InitializeResult] = Decoder.derived[InitializeResult]
-    given Encoder[InitializeResult] = Encoder.derived[InitializeResult]
-
   /**
    * Optional annotations for the client. The client can use annotations to inform how
    * objects are used or displayed.
@@ -459,7 +222,7 @@ object McpSchema:
 
     def resource: Resource
 
-    def readHandler: ReadResourceRequest => F[ReadResourceResult]
+    def readHandler: Request.ReadResourceRequest => F[Result.ReadResourceResult]
 
   /**
    * Resource templates allow servers to expose parameterized resources using URI
@@ -506,11 +269,6 @@ object McpSchema:
   object ListResourceTemplatesResult:
     given Decoder[ListResourceTemplatesResult] = Decoder.derived[ListResourceTemplatesResult]
     given Encoder[ListResourceTemplatesResult] = Encoder.derived[ListResourceTemplatesResult].mapJson(_.dropNullValues)
-
-  final case class ReadResourceRequest(uri: String)
-  object ReadResourceRequest:
-    given Decoder[ReadResourceRequest] = Decoder.derived[ReadResourceRequest]
-    given Encoder[ReadResourceRequest] = Encoder.derived[ReadResourceRequest]
 
   sealed trait ResourceContents:
 
@@ -577,11 +335,6 @@ object McpSchema:
     given Decoder[BlobResourceContents] = Decoder.derived[BlobResourceContents]
     given Encoder[BlobResourceContents] = Encoder.derived[BlobResourceContents]
 
-  final case class ReadResourceResult(contents: List[ResourceContents])
-  object ReadResourceResult:
-    given Decoder[ReadResourceResult] = Decoder.derived[ReadResourceResult]
-    given Encoder[ReadResourceResult] = Encoder.derived[ReadResourceResult]
-
   /**
    * Sent from the client to request resources/updated notifications from the server
    * whenever a particular resource changes.
@@ -636,7 +389,7 @@ object McpSchema:
 
   case class PromptHandler[F[_]](
     prompt:  Prompt,
-    handler: GetPromptRequest => F[GetPromptResult]
+    handler: Request.GetPromptRequest => F[Result.GetPromptResult]
   )
 
   // ---------------------------
@@ -739,34 +492,6 @@ object McpSchema:
     given Decoder[ListPromptsResult] = Decoder.derived[ListPromptsResult]
     given Encoder[ListPromptsResult] = Encoder.derived[ListPromptsResult].mapJson(_.dropNullValues)
 
-  /**
-   * Used by the client to get a prompt provided by the server.
-   *
-   * @param name      The name of the prompt or prompt template.
-   * @param arguments Arguments to use for templating the prompt.
-   */
-  final case class GetPromptRequest(
-    name:      String,
-    arguments: Map[String, Json]
-  ) extends Request
-  object GetPromptRequest:
-    given Decoder[GetPromptRequest] = Decoder.derived[GetPromptRequest]
-    given Encoder[GetPromptRequest] = Encoder.derived[GetPromptRequest]
-
-  /**
-   * The server's response to a prompts/get request from the client.
-   *
-   * @param description An optional description for the prompt.
-   * @param messages    A list of messages to display as part of the prompt.
-   */
-  final case class GetPromptResult(
-    description: Option[String],
-    messages:    List[PromptMessage]
-  )
-  object GetPromptResult:
-    given Decoder[GetPromptResult] = Decoder.derived[GetPromptResult]
-    given Encoder[GetPromptResult] = Encoder.derived[GetPromptResult].mapJson(_.dropNullValues)
-
   trait ToolSchema:
     def name: String
 
@@ -802,67 +527,13 @@ object McpSchema:
   final case class Tool[F[_], T: JsonSchema: Decoder](
     name:        String,
     description: String,
-    execute:     T => F[CallToolResult]
+    execute:     T => F[Result.CallToolResult]
   ) extends ToolSchema:
 
     override def inputSchema: Json = summon[JsonSchema[T]].asJson
 
     def decode(arguments: Json): Decoder.Result[T] =
       summon[Decoder[T]].decodeJson(arguments)
-
-  // ---------------------------
-  // Tool Interfaces
-  // ---------------------------
-  /**
-   * The server's response to a tools/list request from the client.
-   *
-   * @param tools      A list of tools that the server provides.
-   * @param nextCursor An optional cursor for pagination. If present, indicates there
-   *                   are more tools available.
-   */
-  final case class ListToolsResult(
-    tools:      List[ToolSchema],
-    nextCursor: Option[String]
-  )
-  object ListToolsResult:
-    given Encoder[ListToolsResult] = Encoder.derived[ListToolsResult].mapJson(_.dropNullValues)
-
-  /**
-   * Used by the client to call a tool provided by the server.
-   *
-   * @param name      The name of the tool to call. This must match a tool name from
-   *                  tools/list.
-   * @param arguments Arguments to pass to the tool. These must conform to the tool's
-   *                  input schema.
-   */
-  final case class CallToolRequest(
-    name:      String,
-    arguments: Json
-  ) extends Request
-  object CallToolRequest:
-    given Decoder[CallToolRequest] = Decoder.derived[CallToolRequest]
-    given Encoder[CallToolRequest] = Encoder.derived[CallToolRequest]
-
-  /**
-   * The server's response to a tools/call request from the client.
-   *
-   * @param content A list of content items representing the tool's output. Each item can be text, an image,
-   *                or an embedded resource.
-   * @param isError If true, indicates that the tool execution failed and the content contains error information.
-   *                If false or absent, indicates successful execution.
-   */
-  final case class CallToolResult(
-    content: List[Content],
-    isError: Boolean
-  )
-  object CallToolResult:
-    given Decoder[CallToolResult] = Decoder.derived[CallToolResult]
-    given Encoder[CallToolResult] = Encoder.derived[CallToolResult]
-
-    def success(content: List[Content]): CallToolResult =
-      CallToolResult(content, false)
-    def failure(content: List[Content]): CallToolResult =
-      CallToolResult(content, true)
 
   final case class ModelHint(name: String)
   object ModelHint:
@@ -904,20 +575,6 @@ object McpSchema:
       case ContextInclusionStrategy.ALL_SERVERS => "allServers"
     }
 
-  final case class CreateMessageRequest(
-    messages:         List[SamplingMessage],
-    modelPreferences: ModelPreferences,
-    systemPrompt:     Option[String],
-    includeContext:   ContextInclusionStrategy,
-    temperature:      Double,
-    maxTokens:        Int,
-    stopSequences:    List[String],
-    metadata:         Map[String, Json]
-  ) extends Request
-  object CreateMessageRequest:
-    given Decoder[CreateMessageRequest] = Decoder.derived[CreateMessageRequest]
-    given Encoder[CreateMessageRequest] = Encoder.derived[CreateMessageRequest]
-
   enum StopReason:
     case END_TURN, STOP_SEQUENCE, MAX_TOKENS
   object StopReason:
@@ -931,79 +588,6 @@ object McpSchema:
       case StopReason.STOP_SEQUENCE => "stopSequence"
       case StopReason.MAX_TOKENS    => "maxTokens"
     }
-
-  final case class CreateMessageResult(
-    role:       Role,
-    content:    Content,
-    model:      String,
-    stopReason: StopReason
-  )
-  object CreateMessageResult:
-    given Decoder[CreateMessageResult] = Decoder.derived[CreateMessageResult]
-    given Encoder[CreateMessageResult] = Encoder.derived[CreateMessageResult]
-
-  final case class PaginatedRequest(cursor: String)
-  object PaginatedRequest:
-    given Decoder[PaginatedRequest] = Decoder.derived[PaginatedRequest]
-    given Encoder[PaginatedRequest] = Encoder.derived[PaginatedRequest]
-
-  final case class PaginatedResult(nextCursor: String)
-  object PaginatedResult:
-    given Decoder[PaginatedResult] = Decoder.derived[PaginatedResult]
-    given Encoder[PaginatedResult] = Encoder.derived[PaginatedResult]
-
-  // ---------------------------
-  // Progress and Logging
-  // ---------------------------
-  final case class ProgressNotification(
-    progressToken: String,
-    progress:      Double,
-    total:         Double
-  )
-  object ProgressNotification:
-    given Decoder[ProgressNotification] = Decoder.derived[ProgressNotification]
-    given Encoder[ProgressNotification] = Encoder.derived[ProgressNotification]
-
-  enum LoggingLevel(val code: Int, val name: String):
-    case DEBUG     extends LoggingLevel(0, "debug")
-    case INFO      extends LoggingLevel(1, "info")
-    case NOTICE    extends LoggingLevel(2, "notice")
-    case WARNING   extends LoggingLevel(3, "warning")
-    case ERROR     extends LoggingLevel(4, "error")
-    case CRITICAL  extends LoggingLevel(5, "critical")
-    case ALERT     extends LoggingLevel(6, "alert")
-    case EMERGENCY extends LoggingLevel(7, "emergency")
-  object LoggingLevel:
-    given Decoder[LoggingLevel] = Decoder[String].map {
-      case "debug"     => LoggingLevel.DEBUG
-      case "info"      => LoggingLevel.INFO
-      case "notice"    => LoggingLevel.NOTICE
-      case "warning"   => LoggingLevel.WARNING
-      case "error"     => LoggingLevel.ERROR
-      case "critical"  => LoggingLevel.CRITICAL
-      case "alert"     => LoggingLevel.ALERT
-      case "emergency" => LoggingLevel.EMERGENCY
-    }
-    given Encoder[LoggingLevel] = Encoder[String].contramap(_.name)
-
-  /**
-   * The Model Context Protocol (MCP) provides a standardized way for servers to send
-   * structured log messages to clients. Clients can control logging verbosity by
-   * setting minimum log levels, with servers sending notifications containing severity
-   * levels, optional logger names, and arbitrary JSON-serializable data.
-   *
-   * @param level  The severity levels. The mimimum log level is set by the client.
-   * @param logger The logger that generated the message.
-   * @param data   JSON-serializable logging data.
-   */
-  final case class LoggingMessageNotification(
-    level:  LoggingLevel,
-    logger: String,
-    data:   String
-  )
-  object LoggingMessageNotification:
-    given Decoder[LoggingMessageNotification] = Decoder.derived[LoggingMessageNotification]
-    given Encoder[LoggingMessageNotification] = Encoder.derived[LoggingMessageNotification]
 
   sealed trait PromptOrResourceReference:
 
@@ -1048,33 +632,6 @@ object McpSchema:
     given Encoder[CompleteArgument] = Encoder.derived[CompleteArgument]
 
   // ---------------------------
-  // Autocomplete
-  // ---------------------------
-  final case class CompleteRequest(
-    ref:      PromptOrResourceReference,
-    argument: CompleteArgument
-  ) extends Request
-  object CompleteRequest:
-    given Decoder[CompleteRequest] = Decoder.derived[CompleteRequest]
-    given Encoder[CompleteRequest] = Encoder.derived[CompleteRequest]
-
-  final case class CompleteCompletion(
-    values:  List[String],
-    total:   Int,
-    hasMore: Boolean
-  )
-  object CompleteCompletion:
-    given Decoder[CompleteCompletion] = Decoder.derived[CompleteCompletion]
-    given Encoder[CompleteCompletion] = Encoder.derived[CompleteCompletion]
-
-  final case class CompleteResult(
-    completion: CompleteCompletion
-  )
-  object CompleteResult:
-    given Decoder[CompleteResult] = Decoder.derived[CompleteResult]
-    given Encoder[CompleteResult] = Encoder.derived[CompleteResult]
-
-  // ---------------------------
   // Roots
   // ---------------------------
   /**
@@ -1094,18 +651,3 @@ object McpSchema:
   object Root:
     given Decoder[Root] = Decoder.derived[Root]
     given Encoder[Root] = Encoder.derived[Root]
-
-  /**
-   * The client's response to a roots/list request from the server. This result contains
-   * an array of Root objects, each representing a root directory or file that the
-   * server can operate on.
-   *
-   * @param roots An array of Root objects, each representing a root directory or file
-   *              that the server can operate on.
-   */
-  final case class ListRootsResult(
-    roots: List[Root]
-  )
-  object ListRootsResult:
-    given Decoder[ListRootsResult] = Decoder.derived[ListRootsResult]
-    given Encoder[ListRootsResult] = Encoder.derived[ListRootsResult]
