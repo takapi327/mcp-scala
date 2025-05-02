@@ -21,7 +21,7 @@ class McpError(message: String) extends RuntimeException:
 
 object McpError:
 
-  def apply(jsonRpcError: McpSchema.JSONRPCError): McpError =
+  def apply(jsonRpcError: JSONRPCResponse.Error): McpError =
     new McpError(jsonRpcError.message)
 
   def apply(message: String): McpError =
