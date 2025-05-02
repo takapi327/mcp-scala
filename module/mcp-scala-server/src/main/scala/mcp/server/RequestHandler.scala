@@ -116,7 +116,7 @@ object RequestHandler:
   ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
-      request.as[Request.CallToolRequest] match
+      request.as[CallToolRequest] match
         case Left(error) => Async[F].pure(Left(error))
         case Right(callToolRequest) =>
           tools.find(_.name == callToolRequest.name) match
