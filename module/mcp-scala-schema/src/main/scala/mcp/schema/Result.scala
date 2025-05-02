@@ -12,7 +12,6 @@ import io.circe.syntax.*
 import mcp.schema.result.*
 import mcp.schema.McpSchema.{
   Content,
-  Prompt,
   PromptMessage,
   Root,
   StopReason,
@@ -20,14 +19,6 @@ import mcp.schema.McpSchema.{
 }
 
 object Result:
-
-  /**
-   * The server's response to a prompts/list request from the client.
-   */
-  final case class ListPromptsResult(prompts: List[Prompt], nextCursor: Option[Cursor]) extends PaginatedResult
-  object ListPromptsResult:
-    given Decoder[ListPromptsResult] = Decoder.derived[ListPromptsResult]
-    given Encoder[ListPromptsResult] = Encoder.derived[ListPromptsResult].mapJson(_.dropNullValues)
 
   /**
    * The server's response to a prompts/get request from the client.
