@@ -40,6 +40,6 @@ object MySQLTool:
               s"Columns: ${ columns.mkString(", ") }\nRecords: ${ records.map(_.map(_.getOrElse("NULL")).mkString(", ")).mkString("\n") }"
             )
           )
-          McpSchema.CallToolResult.success(contents)
+          Result.CallToolResult(contents, None)
       }
   )

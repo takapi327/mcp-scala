@@ -8,7 +8,7 @@ import cats.effect.*
 
 import fs2.io.*
 
-import mcp.schema.McpSchema
+import mcp.schema.*
 
 import mcp.server.McpServer
 
@@ -22,7 +22,7 @@ object StdioMain extends IOApp.Simple:
       None,
       McpSchema.Annotations(List.empty, None)
     )
-    override def readHandler: McpSchema.ReadResourceRequest => IO[McpSchema.ReadResourceResult] =
+    override def readHandler: Request.ReadResourceRequest => IO[Result.ReadResourceResult] =
       request =>
         file
           .Files[IO]
@@ -30,7 +30,7 @@ object StdioMain extends IOApp.Simple:
           .compile
           .toList
           .map { contents =>
-            McpSchema.ReadResourceResult(
+            Result.ReadResourceResult(
               contents.map(content => McpSchema.TextResourceContents(request.uri, "text/markdown", content))
             )
           }
@@ -44,7 +44,7 @@ object StdioMain extends IOApp.Simple:
       McpSchema.Annotations(List.empty, None)
     )
 
-    override def readHandler: McpSchema.ReadResourceRequest => IO[McpSchema.ReadResourceResult] =
+    override def readHandler: Request.ReadResourceRequest => IO[Result.ReadResourceResult] =
       request =>
         file
           .Files[IO]
@@ -52,7 +52,7 @@ object StdioMain extends IOApp.Simple:
           .compile
           .toList
           .map { contents =>
-            McpSchema.ReadResourceResult(
+            Result.ReadResourceResult(
               contents.map(content => McpSchema.TextResourceContents(request.uri, "text/markdown", content))
             )
           }
@@ -72,12 +72,12 @@ object StdioMain extends IOApp.Simple:
   private val promptHandler = McpSchema.PromptHandler(
     prompt,
     request => {
-      val codeOpt = request.arguments.get("code").flatMap(_.as[String].toOption)
+      val codeOpt = request.arguments.flatMap(_.get("code")).flatMap(_.as[String].toOption)
       codeOpt match
         case None => IO.raiseError(new Exception("Code argument is required"))
         case Some(code) =>
           val content = McpSchema.Content.text(s"Please review this Scala code:\n\n$code")
-          val result = McpSchema.GetPromptResult(
+          val result = Result.GetPromptResult(
             Some("Code review prompt"),
             List(
               McpSchema.PromptMessage(
