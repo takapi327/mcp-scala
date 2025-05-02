@@ -14,7 +14,6 @@ import mcp.schema.McpSchema.{
   Content,
   Prompt,
   PromptMessage,
-  Resource,
   ResourceContents,
   Root,
   StopReason,
@@ -22,12 +21,6 @@ import mcp.schema.McpSchema.{
 }
 
 object Result:
-
-  final case class ListResourceTemplatesResult(resourceTemplates: List[Resource], nextCursor: Option[Cursor])
-    extends PaginatedResult
-  object ListResourceTemplatesResult:
-    given Decoder[ListResourceTemplatesResult] = Decoder.derived[ListResourceTemplatesResult]
-    given Encoder[ListResourceTemplatesResult] = Encoder.derived[ListResourceTemplatesResult].mapJson(_.dropNullValues)
 
   /**
    * The server's response to a resources/read request from the client.

@@ -17,4 +17,3 @@ final case class ListResourceTemplatesResult(resourceTemplates: List[Resource], 
 object ListResourceTemplatesResult:
   given Decoder[ListResourceTemplatesResult] = Decoder.derived[ListResourceTemplatesResult]
   given Encoder[ListResourceTemplatesResult] = Encoder.derived[ListResourceTemplatesResult].mapJson(_.dropNullValues)
-
