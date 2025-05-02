@@ -21,36 +21,6 @@ import mcp.schema.request.*
 
 object Request:
 
-
-  final case class ListResourcesRequest(cursor: Option[Cursor]) extends PaginatedRequest:
-    override def method: Method = Method.METHOD_RESOURCES_LIST
-  object ListResourcesRequest:
-    given Decoder[ListResourcesRequest] = Decoder.instance { cursor =>
-      for {
-        cursor <- cursor.get[Option[Cursor]]("cursor")
-      } yield ListResourcesRequest(cursor)
-    }
-
-    given Encoder[ListResourcesRequest] = Encoder.instance { list =>
-      Json
-        .obj(
-          "method" -> list.method.asJson,
-          "cursor" -> list.cursor.asJson
-        )
-        .dropNullValues
-    }
-
-  final case class ListResourceTemplatesRequest() extends Request:
-    override def method: Method = Method.METHOD_RESOURCES_TEMPLATES_LIST
-  object ListResourceTemplatesRequest:
-    given Decoder[ListResourceTemplatesRequest] = Decoder.derived[ListResourceTemplatesRequest]
-
-    given Encoder[ListResourceTemplatesRequest] = Encoder.instance { list =>
-      Json.obj(
-        "method" -> list.method.asJson
-      )
-    }
-
   final case class ReadResourceRequest(uri: String) extends Request:
     override def method: Method = Method.METHOD_RESOURCES_READ
   object ReadResourceRequest:
