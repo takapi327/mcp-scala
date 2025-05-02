@@ -13,10 +13,11 @@ import io.circe.*
  */
 final case class JSONRPCRequest(
   jsonrpc: String,
-  method: Method,
-  id: RequestId,
-  params: Option[Json]
-) extends JSONRPCMessage, Request
+  method:  Method,
+  id:      RequestId,
+  params:  Option[Json]
+) extends JSONRPCMessage,
+          Request
 
 object JSONRPCRequest:
   given Decoder[JSONRPCRequest] = Decoder.derived[JSONRPCRequest]

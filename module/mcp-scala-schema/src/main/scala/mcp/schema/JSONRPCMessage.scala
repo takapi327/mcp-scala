@@ -25,8 +25,8 @@ object JSONRPCMessage:
   ).reduceLeft(_ or _)
 
   given Encoder[JSONRPCMessage] = Encoder.instance {
-    case request: JSONRPCRequest => request.asJson
+    case request: JSONRPCRequest           => request.asJson
     case notification: JSONRPCNotification => notification.asJson
-    case batch: JSONRPCBatch => batch.asJson
-    case response: JSONRPCResponse => response.asJson
+    case batch: JSONRPCBatch               => batch.asJson
+    case response: JSONRPCResponse         => response.asJson
   }

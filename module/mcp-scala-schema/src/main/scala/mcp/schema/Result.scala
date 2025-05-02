@@ -9,7 +9,18 @@ package mcp.schema
 import io.circe.*
 import io.circe.syntax.*
 
-import mcp.schema.McpSchema.{ServerCapabilities, Implementation, Resource, ResourceContents, Prompt, PromptMessage, ToolSchema, Content, StopReason, Root}
+import mcp.schema.McpSchema.{
+  Content,
+  Implementation,
+  Prompt,
+  PromptMessage,
+  Resource,
+  ResourceContents,
+  Root,
+  ServerCapabilities,
+  StopReason,
+  ToolSchema
+}
 
 trait Result
 
@@ -31,11 +42,11 @@ object Result:
    * After receiving an initialize request from the client, the server sends this response.
    */
   final case class InitializeResult(
-                                     protocolVersion: String,
-                                     capabilities:    ServerCapabilities,
-                                     serverInfo:      Implementation,
-                                     instructions:    Option[String]
-                                   ) extends Result
+    protocolVersion: String,
+    capabilities:    ServerCapabilities,
+    serverInfo:      Implementation,
+    instructions:    Option[String]
+  ) extends Result
   object InitializeResult:
     given Decoder[InitializeResult] = Decoder.derived[InitializeResult]
     given Encoder[InitializeResult] = Encoder.derived[InitializeResult]
@@ -45,7 +56,8 @@ object Result:
     given Decoder[ListResourcesResult] = Decoder.derived[ListResourcesResult]
     given Encoder[ListResourcesResult] = Encoder.derived[ListResourcesResult].mapJson(_.dropNullValues)
 
-  final case class ListResourceTemplatesResult(resourceTemplates: List[Resource], nextCursor: Option[Cursor]) extends PaginatedResult
+  final case class ListResourceTemplatesResult(resourceTemplates: List[Resource], nextCursor: Option[Cursor])
+    extends PaginatedResult
   object ListResourceTemplatesResult:
     given Decoder[ListResourceTemplatesResult] = Decoder.derived[ListResourceTemplatesResult]
     given Encoder[ListResourceTemplatesResult] = Encoder.derived[ListResourceTemplatesResult].mapJson(_.dropNullValues)
@@ -94,9 +106,9 @@ object Result:
    * should be reported as an MCP error response.
    */
   final case class CallToolResult(
-                                   content: List[Content],
-                                   isError: Option[Boolean]
-                                 ) extends Result
+    content: List[Content],
+    isError: Option[Boolean]
+  ) extends Result
   object CallToolResult:
     given Decoder[CallToolResult] = Decoder.derived[CallToolResult]
     given Encoder[CallToolResult] = Encoder.derived[CallToolResult].mapJson(_.dropNullValues)
@@ -118,19 +130,21 @@ object Result:
   object CompleteResult:
     given Decoder[CompleteResult] = Decoder.instance { cursor =>
       for {
-        values <- cursor.get[List[String]]("completion.values")
-        total <- cursor.get[Option[Int]]("completion.total")
+        values  <- cursor.get[List[String]]("completion.values")
+        total   <- cursor.get[Option[Int]]("completion.total")
         hasMore <- cursor.get[Option[Boolean]]("completion.hasMore")
       } yield CompleteResult(values, total, hasMore)
     }
     given Encoder[CompleteResult] = Encoder.instance { result =>
-      Json.obj(
-        "completion" -> Json.obj(
-          "values" -> result.values.asJson,
-          "total" -> result.total.asJson,
-          "hasMore" -> result.hasMore.asJson
+      Json
+        .obj(
+          "completion" -> Json.obj(
+            "values"  -> result.values.asJson,
+            "total"   -> result.total.asJson,
+            "hasMore" -> result.hasMore.asJson
+          )
         )
-      ).dropNullValues
+        .dropNullValues
     }
 
   /**

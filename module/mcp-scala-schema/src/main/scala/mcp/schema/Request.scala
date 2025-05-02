@@ -9,7 +9,15 @@ package mcp.schema
 import io.circe.*
 import io.circe.syntax.*
 
-import mcp.schema.McpSchema.{ ClientCapabilities, Implementation, SamplingMessage, ModelPreferences, ContextInclusionStrategy, PromptOrResourceReference, CompleteArgument}
+import mcp.schema.McpSchema.{
+  ClientCapabilities,
+  CompleteArgument,
+  ContextInclusionStrategy,
+  Implementation,
+  ModelPreferences,
+  PromptOrResourceReference,
+  SamplingMessage
+}
 
 trait Request:
 
@@ -24,17 +32,17 @@ object Request:
    * This request is sent from the client to the server when it first connects, asking it to begin initialization.
    */
   final case class InitializeRequest(
-                                      protocolVersion: String,
-                                                                          capabilities:    ClientCapabilities,
-                                                                          clientInfo:      Implementation
-                                    ) extends Request:
+    protocolVersion: String,
+    capabilities:    ClientCapabilities,
+    clientInfo:      Implementation
+  ) extends Request:
     override def method: Method = Method.METHOD_INITIALIZE
   object InitializeRequest:
     given Decoder[InitializeRequest] = Decoder.instance { cursor =>
       for
         protocolVersion <- cursor.get[String]("protocolVersion")
-        capabilities <- cursor.get[ClientCapabilities]("capabilities")
-        clientInfo <- cursor.get[Implementation]("clientInfo")
+        capabilities    <- cursor.get[ClientCapabilities]("capabilities")
+        clientInfo      <- cursor.get[Implementation]("clientInfo")
       yield InitializeRequest(protocolVersion, capabilities, clientInfo)
     }
 
@@ -43,8 +51,8 @@ object Request:
         "method" -> init.method.asJson,
         "params" -> Json.obj(
           "protocolVersion" -> init.protocolVersion.asJson,
-          "capabilities" -> init.capabilities.asJson,
-          "clientInfo" -> init.clientInfo.asJson,
+          "capabilities"    -> init.capabilities.asJson,
+          "clientInfo"      -> init.clientInfo.asJson
         )
       )
     }
@@ -58,7 +66,7 @@ object Request:
     given Decoder[PingRequest] = Decoder.derived[PingRequest]
     given Encoder[PingRequest] = Encoder.instance { ping =>
       Json.obj(
-        "method" -> ping.method.asJson,
+        "method" -> ping.method.asJson
       )
     }
 
@@ -72,10 +80,12 @@ object Request:
     }
 
     given Encoder[ListResourcesRequest] = Encoder.instance { list =>
-      Json.obj(
-        "method" -> list.method.asJson,
-        "cursor" -> list.cursor.asJson
-      ).dropNullValues
+      Json
+        .obj(
+          "method" -> list.method.asJson,
+          "cursor" -> list.cursor.asJson
+        )
+        .dropNullValues
     }
 
   final case class ListResourceTemplatesRequest() extends Request:
@@ -85,7 +95,7 @@ object Request:
 
     given Encoder[ListResourceTemplatesRequest] = Encoder.instance { list =>
       Json.obj(
-        "method" -> list.method.asJson,
+        "method" -> list.method.asJson
       )
     }
 
@@ -102,7 +112,7 @@ object Request:
       Json.obj(
         "method" -> read.method.asJson,
         "params" -> Json.obj(
-          "uri" -> read.uri.asJson,
+          "uri" -> read.uri.asJson
         )
       )
     }
@@ -123,7 +133,7 @@ object Request:
       Json.obj(
         "method" -> subscribe.method.asJson,
         "params" -> Json.obj(
-          "uri" -> subscribe.uri.asJson,
+          "uri" -> subscribe.uri.asJson
         )
       )
     }
@@ -144,7 +154,7 @@ object Request:
       Json.obj(
         "method" -> unsubscribe.method.asJson,
         "params" -> Json.obj(
-          "uri" -> unsubscribe.uri.asJson,
+          "uri" -> unsubscribe.uri.asJson
         )
       )
     }
@@ -159,10 +169,12 @@ object Request:
     }
 
     given Encoder[ListPromptsRequest] = Encoder.instance { list =>
-      Json.obj(
-        "method" -> list.method.asJson,
-        "cursor" -> list.cursor.asJson
-      ).dropNullValues
+      Json
+        .obj(
+          "method" -> list.method.asJson,
+          "cursor" -> list.cursor.asJson
+        )
+        .dropNullValues
     }
 
   /**
@@ -173,7 +185,7 @@ object Request:
   object GetPromptRequest:
     given Decoder[GetPromptRequest] = Decoder.instance { cursor =>
       for {
-        name <- cursor.get[String]("name")
+        name      <- cursor.get[String]("name")
         arguments <- cursor.get[Option[Map[String, Json]]]("arguments")
       } yield GetPromptRequest(name, arguments)
     }
@@ -182,8 +194,8 @@ object Request:
       Json.obj(
         "method" -> get.method.asJson,
         "params" -> Json.obj(
-          "name" -> get.name.asJson,
-          "arguments" -> get.arguments.asJson,
+          "name"      -> get.name.asJson,
+          "arguments" -> get.arguments.asJson
         )
       )
     }
@@ -201,30 +213,34 @@ object Request:
     }
 
     given Encoder[ListToolsRequest] = Encoder.instance { list =>
-      Json.obj(
-        "method" -> list.method.asJson,
-        "cursor" -> list.cursor.asJson
-      ).dropNullValues
+      Json
+        .obj(
+          "method" -> list.method.asJson,
+          "cursor" -> list.cursor.asJson
+        )
+        .dropNullValues
     }
 
-  final case class CallToolRequest(name:      String, arguments: Option[Json]) extends Request:
+  final case class CallToolRequest(name: String, arguments: Option[Json]) extends Request:
     override def method: Method = Method.METHOD_TOOLS_CALL
   object CallToolRequest:
     given Decoder[CallToolRequest] = Decoder.instance { cursor =>
       for {
-        name <- cursor.get[String]("name")
+        name      <- cursor.get[String]("name")
         arguments <- cursor.get[Option[Json]]("arguments")
       } yield CallToolRequest(name, arguments)
     }
 
     given Encoder[CallToolRequest] = Encoder.instance { call =>
-      Json.obj(
-        "method" -> call.method.asJson,
-        "params" -> Json.obj(
-          "name" -> call.name.asJson,
-          "arguments" -> call.arguments.asJson,
+      Json
+        .obj(
+          "method" -> call.method.asJson,
+          "params" -> Json.obj(
+            "name"      -> call.name.asJson,
+            "arguments" -> call.arguments.asJson
+          )
         )
-      ).dropNullValues
+        .dropNullValues
     }
 
   /**
@@ -240,67 +256,91 @@ object Request:
     }
 
     given Encoder[SetLevelRequest] = Encoder.instance { set =>
-      Json.obj(
-        "method" -> set.method.asJson,
-        "params" -> Json.obj(
-          "level" -> set.level.asJson,
+      Json
+        .obj(
+          "method" -> set.method.asJson,
+          "params" -> Json.obj(
+            "level" -> set.level.asJson
+          )
         )
-      ).dropNullValues
+        .dropNullValues
     }
 
   /**
    * A request from the server to sample an LLM via the client. The client has full discretion over which model to select. The client should also inform the user before beginning sampling, to allow them to inspect the request (human in the loop) and decide whether to approve it.
    */
-  final case class CreateMessageRequest(messages: List[SamplingMessage], modelPreferences: Option[ModelPreferences], systemPrompt: Option[String], includeContext: Option[ContextInclusionStrategy], temperature: Option[String], maxTokens: Int, stopSequences: Option[Int], metaData: Option[Json]) extends Request:
+  final case class CreateMessageRequest(
+    messages:         List[SamplingMessage],
+    modelPreferences: Option[ModelPreferences],
+    systemPrompt:     Option[String],
+    includeContext:   Option[ContextInclusionStrategy],
+    temperature:      Option[String],
+    maxTokens:        Int,
+    stopSequences:    Option[Int],
+    metaData:         Option[Json]
+  ) extends Request:
     override def method: Method = Method.METHOD_NOTIFICATION_MESSAGE
   object CreateMessageRequest:
     given Decoder[CreateMessageRequest] = Decoder.instance { cursor =>
       for {
-        messages <- cursor.get[List[SamplingMessage]]("messages")
+        messages         <- cursor.get[List[SamplingMessage]]("messages")
         modelPreferences <- cursor.get[Option[ModelPreferences]]("modelPreferences")
-        systemPrompt <- cursor.get[Option[String]]("systemPrompt")
-        includeContext <- cursor.get[Option[ContextInclusionStrategy]]("includeContext")
-        temperature <- cursor.get[Option[String]]("temperature")
-        maxTokens <- cursor.get[Int]("maxTokens")
-        stopSequences <- cursor.get[Option[Int]]("stopSequences")
-        metaData <- cursor.get[Option[Json]]("metaData")
-      } yield CreateMessageRequest(messages, modelPreferences, systemPrompt, includeContext, temperature, maxTokens, stopSequences, metaData)
+        systemPrompt     <- cursor.get[Option[String]]("systemPrompt")
+        includeContext   <- cursor.get[Option[ContextInclusionStrategy]]("includeContext")
+        temperature      <- cursor.get[Option[String]]("temperature")
+        maxTokens        <- cursor.get[Int]("maxTokens")
+        stopSequences    <- cursor.get[Option[Int]]("stopSequences")
+        metaData         <- cursor.get[Option[Json]]("metaData")
+      } yield CreateMessageRequest(
+        messages,
+        modelPreferences,
+        systemPrompt,
+        includeContext,
+        temperature,
+        maxTokens,
+        stopSequences,
+        metaData
+      )
     }
 
     given Encoder[CreateMessageRequest] = Encoder.instance { create =>
-      Json.obj(
-        "method" -> create.method.asJson,
-        "params" -> Json.obj(
-          "messages" -> create.messages.asJson,
-          "modelPreferences" -> create.modelPreferences.asJson,
-          "systemPrompt" -> create.systemPrompt.asJson,
-          "includeContext" -> create.includeContext.asJson,
-          "temperature" -> create.temperature.asJson,
-          "maxTokens" -> create.maxTokens.asJson,
-          "stopSequences" -> create.stopSequences.asJson,
-          "metaData" -> create.metaData.asJson,
+      Json
+        .obj(
+          "method" -> create.method.asJson,
+          "params" -> Json.obj(
+            "messages"         -> create.messages.asJson,
+            "modelPreferences" -> create.modelPreferences.asJson,
+            "systemPrompt"     -> create.systemPrompt.asJson,
+            "includeContext"   -> create.includeContext.asJson,
+            "temperature"      -> create.temperature.asJson,
+            "maxTokens"        -> create.maxTokens.asJson,
+            "stopSequences"    -> create.stopSequences.asJson,
+            "metaData"         -> create.metaData.asJson
+          )
         )
-      ).dropNullValues
+        .dropNullValues
     }
 
-  final case class CompleteRequest(ref:      PromptOrResourceReference, argument: CompleteArgument) extends Request:
+  final case class CompleteRequest(ref: PromptOrResourceReference, argument: CompleteArgument) extends Request:
     override def method: Method = Method.METHOD_COMPLETION_COMPLETE
   object CompleteRequest:
     given Decoder[CompleteRequest] = Decoder.instance { cursor =>
       for {
-        ref <- cursor.get[PromptOrResourceReference]("ref")
+        ref      <- cursor.get[PromptOrResourceReference]("ref")
         argument <- cursor.get[CompleteArgument]("argument")
       } yield CompleteRequest(ref, argument)
     }
 
     given Encoder[CompleteRequest] = Encoder.instance { complete =>
-      Json.obj(
-        "method" -> complete.method.asJson,
-        "params" -> Json.obj(
-          "ref" -> complete.ref.asJson,
-          "argument" -> complete.argument.asJson,
+      Json
+        .obj(
+          "method" -> complete.method.asJson,
+          "params" -> Json.obj(
+            "ref"      -> complete.ref.asJson,
+            "argument" -> complete.argument.asJson
+          )
         )
-      ).dropNullValues
+        .dropNullValues
     }
 
   /**
@@ -319,6 +359,6 @@ object Request:
 
     given Encoder[ListRootsRequest] = Encoder.instance { list =>
       Json.obj(
-        "method" -> list.method.asJson,
+        "method" -> list.method.asJson
       )
     }

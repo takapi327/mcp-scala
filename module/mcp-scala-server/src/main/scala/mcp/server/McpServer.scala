@@ -32,7 +32,7 @@ object McpServer:
 
   private def voidTransport[F[_]: Async]: McpTransport[F] = new McpTransport[F]:
     override def requestHandlers: Map[Method, RequestHandler[F]] = Map.empty
-    override def handleRequest(): F[Unit]                                  = Async[F].unit
+    override def handleRequest(): F[Unit]                        = Async[F].unit
 
   def apply[F[_]: Async: LiftIO](name: String, version: String): McpServer[F] = Impl[F](
     McpSchema.Implementation(name, version),
@@ -108,12 +108,13 @@ object McpServer:
 
     def start(transportType: "stdio" | "sse"): F[Unit] =
       transportType match
-        case "stdio" => StdioMcpTransport(
-          handleProvider.handlers,
-          Some("/Users/takapi327/Development/oss/scala/mcp-scala/input.log"),
-          Some("/Users/takapi327/Development/oss/scala/mcp-scala/output.log")
-        ).handleRequest()
-        case "sse"   => Async[F].raiseError(new McpError("SSE transport is not implemented yet"))
+        case "stdio" =>
+          StdioMcpTransport(
+            handleProvider.handlers,
+            Some("/Users/takapi327/Development/oss/scala/mcp-scala/input.log"),
+            Some("/Users/takapi327/Development/oss/scala/mcp-scala/output.log")
+          ).handleRequest()
+        case "sse" => Async[F].raiseError(new McpError("SSE transport is not implemented yet"))
 
   object FastMcp:
 

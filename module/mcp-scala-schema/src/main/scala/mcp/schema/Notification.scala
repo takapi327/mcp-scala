@@ -31,7 +31,7 @@ object Notification:
 
     given Encoder[InitializedNotification] = Encoder.instance { init =>
       Json.obj(
-        "method" -> init.method.asJson,
+        "method" -> init.method.asJson
       )
     }
 
@@ -39,20 +39,20 @@ object Notification:
    * An out-of-band notification used to inform the receiver of a progress update for a long-running request.
    */
   final case class ProgressNotification(
-                                         progressToken: ProgressToken,
-                                         progress: Int,
-                                         total: Option[Int],
-                                         message: Option[String],
-                                       ) extends Notification:
+    progressToken: ProgressToken,
+    progress:      Int,
+    total:         Option[Int],
+    message:       Option[String]
+  ) extends Notification:
     override def method: Method = Method.METHOD_NOTIFICATION_PROGRESS
   object ProgressNotification:
     given Decoder[ProgressNotification] = Decoder.instance { cursor =>
       for {
-        method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_PROGRESS)
+        method        <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_PROGRESS)
         progressToken <- cursor.get[ProgressToken]("progressToken")
-        progress <- cursor.get[Int]("progress")
-        total <- cursor.get[Option[Int]]("total")
-        message <- cursor.get[Option[String]]("message")
+        progress      <- cursor.get[Int]("progress")
+        total         <- cursor.get[Option[Int]]("total")
+        message       <- cursor.get[Option[String]]("message")
       } yield
         if method then ProgressNotification(progressToken, progress, total, message)
         else throw new Exception("Invalid method for ProgressNotification")
@@ -62,9 +62,9 @@ object Notification:
         "method" -> progress.method.asJson,
         "params" -> Json.obj(
           "progressToken" -> progress.progressToken.asJson,
-          "progress" -> progress.progress.asJson,
-          "total" -> progress.total.asJson,
-          "message" -> progress.message.asJson,
+          "progress"      -> progress.progress.asJson,
+          "total"         -> progress.total.asJson,
+          "message"       -> progress.message.asJson
         )
       )
     }
@@ -85,7 +85,7 @@ object Notification:
 
     given Encoder[ResourceListChangedNotification] = Encoder.instance { list =>
       Json.obj(
-        "method" -> list.method.asJson,
+        "method" -> list.method.asJson
       )
     }
 
@@ -98,7 +98,7 @@ object Notification:
     given Decoder[ResourceUpdatedNotification] = Decoder.instance { cursor =>
       for {
         method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED)
-        uri <- cursor.get[String]("uri")
+        uri    <- cursor.get[String]("uri")
       } yield
         if method then ResourceUpdatedNotification(uri)
         else throw new Exception("Invalid method for ResourceUpdatedNotification")
@@ -108,7 +108,7 @@ object Notification:
       Json.obj(
         "method" -> update.method.asJson,
         "params" -> Json.obj(
-          "uri" -> update.uri.asJson,
+          "uri" -> update.uri.asJson
         )
       )
     }
@@ -129,7 +129,7 @@ object Notification:
 
     given Encoder[PromptListChangedNotification] = Encoder.instance { list =>
       Json.obj(
-        "method" -> list.method.asJson,
+        "method" -> list.method.asJson
       )
     }
 
@@ -146,22 +146,23 @@ object Notification:
 
     given Encoder[ToolListChangedNotification] = Encoder.instance { list =>
       Json.obj(
-        "method" -> list.method.asJson,
+        "method" -> list.method.asJson
       )
     }
 
   /**
    * Notification of a log message passed from server to client. If no logging/setLevel request has been sent from the client, the server MAY decide which messages to send automatically.
    */
-  final case class LoggingMessageNotification(level: LoggingLevel, logger: Option[String], data: Json) extends Notification:
+  final case class LoggingMessageNotification(level: LoggingLevel, logger: Option[String], data: Json)
+    extends Notification:
     override def method: Method = Method.METHOD_NOTIFICATION_MESSAGE
   object LoggingMessageNotification:
     given Decoder[LoggingMessageNotification] = Decoder.instance { cursor =>
       for {
         method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_MESSAGE)
-        level <- cursor.get[LoggingLevel]("level")
+        level  <- cursor.get[LoggingLevel]("level")
         logger <- cursor.get[Option[String]]("logger")
-        data <- cursor.get[Json]("data")
+        data   <- cursor.get[Json]("data")
       } yield
         if method then LoggingMessageNotification(level, logger, data)
         else throw new Exception("Invalid method for LoggingMessageNotification")
@@ -171,13 +172,13 @@ object Notification:
       Json.obj(
         "method" -> message.method.asJson,
         "params" -> Json.obj(
-          "level" -> message.level.asJson,
+          "level"  -> message.level.asJson,
           "logger" -> message.logger.asJson,
-          "data" -> message.data.asJson,
+          "data"   -> message.data.asJson
         )
       )
     }
-    
+
   final case class RootsListChangedNotification() extends Notification:
     override def method: Method = Method.METHOD_NOTIFICATION_ROOTS_LIST_CHANGED
   object RootsListChangedNotification:
@@ -191,7 +192,7 @@ object Notification:
 
     given Encoder[RootsListChangedNotification] = Encoder.instance { list =>
       Json.obj(
-        "method" -> list.method.asJson,
+        "method" -> list.method.asJson
       )
     }
 
@@ -216,8 +217,10 @@ object Notification:
         else throw new Exception("Invalid method for CancelledNotification")
     }
     given Encoder[CancelledNotification] = Encoder.instance { cancel =>
-      Json.obj(
-        "method" -> cancel.method.asJson,
-        "params" -> cancel.params.asJson,
-      ).dropNullValues
+      Json
+        .obj(
+          "method" -> cancel.method.asJson,
+          "params" -> cancel.params.asJson
+        )
+        .dropNullValues
     }

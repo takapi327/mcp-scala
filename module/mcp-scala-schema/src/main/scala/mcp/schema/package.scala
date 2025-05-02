@@ -14,7 +14,7 @@ import io.circe.*
 package object schema:
 
   val LATEST_PROTOCOL_VERSION: String = "2024-11-05"
-  val JSONRPC_VERSION: String = "2.0"
+  val JSONRPC_VERSION:         String = "2.0"
 
   /**
    * A progress token, used to associate progress notifications with the original request.
@@ -45,7 +45,7 @@ package object schema:
     given Encoder[ProgressToken] = Encoder.instance {
       case ProgressToken.StringToken(value) => Json.fromString(value)
       case ProgressToken.NumberToken(value) => Json.fromBigDecimal(value)
-      case ProgressToken.NullToken => Json.Null
+      case ProgressToken.NullToken          => Json.Null
     }
 
   /**
@@ -53,7 +53,7 @@ package object schema:
    */
   opaque type Cursor = String
   object Cursor:
-    def apply(value: String): Cursor = value
+    def apply(value:   String): Cursor = value
     def unapply(value: Cursor): String = value
 
     given Decoder[Cursor] = Decoder.decodeString.map(Cursor.apply)
@@ -93,7 +93,7 @@ package object schema:
 
   opaque type Method = String
   object Method:
-    def apply(value: String): Method = value
+    def apply(value:   String): Method = value
     def unapply(value: Method): String = value
 
     // 無限再帰を避けるため、直接文字列をデコードするよう修正
@@ -106,47 +106,47 @@ package object schema:
     // ---------------------------
     // Method Names
     // ---------------------------
-  
+
     // Lifecycle Methods
-    val METHOD_INITIALIZE: Method = "initialize"
+    val METHOD_INITIALIZE:               Method = "initialize"
     val METHOD_NOTIFICATION_INITIALIZED: Method = "notifications/initialized"
-    val METHOD_PING: Method = "ping"
-  
+    val METHOD_PING:                     Method = "ping"
+
     // Tool Methods
-    val METHOD_TOOLS_LIST: Method = "tools/list"
-    val METHOD_TOOLS_CALL: Method = "tools/call"
+    val METHOD_TOOLS_LIST:                      Method = "tools/list"
+    val METHOD_TOOLS_CALL:                      Method = "tools/call"
     val METHOD_NOTIFICATION_TOOLS_LIST_CHANGED: Method = "notifications/tools/list_changed"
-  
+
     // Resources Methods
-    val METHOD_RESOURCES_LIST: Method = "resources/list"
-    val METHOD_RESOURCES_READ: Method = "resources/read"
+    val METHOD_RESOURCES_LIST:                      Method = "resources/list"
+    val METHOD_RESOURCES_READ:                      Method = "resources/read"
     val METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED: Method = "notifications/resources/list_changed"
-    val METHOD_RESOURCES_TEMPLATES_LIST: Method = "resources/templates/list"
-    val METHOD_RESOURCES_SUBSCRIBE: Method = "resources/subscribe"
-    val METHOD_RESOURCES_UNSUBSCRIBE: Method = "resources/unsubscribe"
-  
+    val METHOD_RESOURCES_TEMPLATES_LIST:            Method = "resources/templates/list"
+    val METHOD_RESOURCES_SUBSCRIBE:                 Method = "resources/subscribe"
+    val METHOD_RESOURCES_UNSUBSCRIBE:               Method = "resources/unsubscribe"
+
     // Prompt Methods
-    val METHOD_PROMPT_LIST: Method = "prompts/list"
-    val METHOD_PROMPT_GET: Method = "prompts/get"
+    val METHOD_PROMPT_LIST:                       Method = "prompts/list"
+    val METHOD_PROMPT_GET:                        Method = "prompts/get"
     val METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED: Method = "notifications/prompts/list_changed"
-  
+
     // Logging Methods
-    val METHOD_LOGGING_SET_LEVEL: Method = "logging/setLevel"
+    val METHOD_LOGGING_SET_LEVEL:    Method = "logging/setLevel"
     val METHOD_NOTIFICATION_MESSAGE: Method = "notifications/message"
-  
+
     // Roots Methods
-    val METHOD_ROOTS_LIST: Method = "roots/list"
+    val METHOD_ROOTS_LIST:                      Method = "roots/list"
     val METHOD_NOTIFICATION_ROOTS_LIST_CHANGED: Method = "notifications/roots/list_changed"
-  
+
     // Sampling Methods
     val METHOD_SAMPLING_CREATE_MESSAGE: Method = "sampling/createMessage"
-    
+
     // Cancelled Methods
     val METHOD_CANCEL_NOTIFICATIONS: Method = "notifications/cancelled"
-    
+
     // Progress Methods
     val METHOD_NOTIFICATION_PROGRESS: Method = "notifications/progress"
-    
+
     // completion Methods
     val METHOD_COMPLETION_COMPLETE: Method = "completion/complete"
 
@@ -189,24 +189,24 @@ package object schema:
    * https://datatracker.ietf.org/doc/html/rfc5424#section-6.2.1
    */
   enum LoggingLevel(val code: Int, val name: String):
-    case DEBUG extends LoggingLevel(0, "debug")
-    case INFO extends LoggingLevel(1, "info")
-    case NOTICE extends LoggingLevel(2, "notice")
-    case WARNING extends LoggingLevel(3, "warning")
-    case ERROR extends LoggingLevel(4, "error")
-    case CRITICAL extends LoggingLevel(5, "critical")
-    case ALERT extends LoggingLevel(6, "alert")
+    case DEBUG     extends LoggingLevel(0, "debug")
+    case INFO      extends LoggingLevel(1, "info")
+    case NOTICE    extends LoggingLevel(2, "notice")
+    case WARNING   extends LoggingLevel(3, "warning")
+    case ERROR     extends LoggingLevel(4, "error")
+    case CRITICAL  extends LoggingLevel(5, "critical")
+    case ALERT     extends LoggingLevel(6, "alert")
     case EMERGENCY extends LoggingLevel(7, "emergency")
 
   object LoggingLevel:
     given Decoder[LoggingLevel] = Decoder[String].map {
-      case "debug" => LoggingLevel.DEBUG
-      case "info" => LoggingLevel.INFO
-      case "notice" => LoggingLevel.NOTICE
-      case "warning" => LoggingLevel.WARNING
-      case "error" => LoggingLevel.ERROR
-      case "critical" => LoggingLevel.CRITICAL
-      case "alert" => LoggingLevel.ALERT
+      case "debug"     => LoggingLevel.DEBUG
+      case "info"      => LoggingLevel.INFO
+      case "notice"    => LoggingLevel.NOTICE
+      case "warning"   => LoggingLevel.WARNING
+      case "error"     => LoggingLevel.ERROR
+      case "critical"  => LoggingLevel.CRITICAL
+      case "alert"     => LoggingLevel.ALERT
       case "emergency" => LoggingLevel.EMERGENCY
     }
     given Encoder[LoggingLevel] = Encoder[String].contramap(_.name)

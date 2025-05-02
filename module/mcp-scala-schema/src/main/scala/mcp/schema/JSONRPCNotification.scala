@@ -13,8 +13,8 @@ import io.circe.*
  */
 final case class JSONRPCNotification(
   jsonrpc: String,
-  method: Method,
-  params: Option[Json]
+  method:  Method,
+  params:  Option[Json]
 ) extends JSONRPCMessage
 
 object JSONRPCNotification:

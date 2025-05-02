@@ -88,7 +88,9 @@ case class StdioMcpTransport[F[_]: Async: LiftIO](
       case Right(json) =>
         json.as[JSONRPCMessage] match
           case Left(error) =>
-            val id = json.hcursor.get[RequestId]("id").getOrElse(throw new IllegalArgumentException("The required Id does not exist."))
+            val id = json.hcursor
+              .get[RequestId]("id")
+              .getOrElse(throw new IllegalArgumentException("The required Id does not exist."))
             val response = JSONRPCResponse.failure(
               id,
               ErrorCodes.INVALID_REQUEST,
@@ -142,10 +144,11 @@ case class StdioMcpTransport[F[_]: Async: LiftIO](
 
   private def handleIncomingBatch(batch: JSONRPCBatch): F[List[JSONRPCResponse]] =
     val listIO = batch.requests.map {
-      case req: JSONRPCRequest               => handleIncomingRequest(req).map { response =>
-        Some(JSONRPCResponse.success(req.id, response.asJson))
-      }
+      case req: JSONRPCRequest =>
+        handleIncomingRequest(req).map { response =>
+          Some(JSONRPCResponse.success(req.id, response.asJson))
+        }
       case notification: JSONRPCNotification => handleIncomingNotification(notification).map(_ => None)
-      case _ => Async[F].pure(None)
+      case _                                 => Async[F].pure(None)
     }
     listIO.sequence.map(_.flatten)

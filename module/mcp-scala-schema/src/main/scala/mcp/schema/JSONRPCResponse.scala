@@ -16,8 +16,8 @@ import io.circe.syntax.*
  */
 trait JSONRPCResponse extends JSONRPCMessage:
   def jsonrpc: String
-  def id: RequestId
-                            
+  def id:      RequestId
+
 object JSONRPCResponse:
   given Decoder[JSONRPCResponse] =
     List[Decoder[JSONRPCResponse]](
@@ -26,56 +26,55 @@ object JSONRPCResponse:
     ).reduceLeft(_ or _)
 
   given Encoder[JSONRPCResponse] = Encoder.instance {
-    case error: Error => error.asJson
-    case success: Success    => success.asJson
+    case error: Error     => error.asJson
+    case success: Success => success.asJson
   }
-  
+
   final case class Success(
     jsonrpc: String,
-    id: RequestId,
-    result: Json,
+    id:      RequestId,
+    result:  Json
   ) extends JSONRPCResponse
   object Success:
     given Decoder[Success] = Decoder.derived[Success]
     given Encoder[Success] = Encoder.derived[Success]
 
   final case class Error(
-                                 jsonrpc: String,
-                                 id: RequestId,
-                                 code: Int,
-                                 message: String,
-                                 data: Option[Json],
-                               ) extends JSONRPCResponse
+    jsonrpc: String,
+    id:      RequestId,
+    code:    Int,
+    message: String,
+    data:    Option[Json]
+  ) extends JSONRPCResponse
   object Error:
     given Decoder[Error] = Decoder.instance { cursor =>
       for
         jsonrpc <- cursor.get[String]("jsonrpc")
-        id <- cursor.get[RequestId]("id")
-        code <- cursor.get[Int]("error.code")
+        id      <- cursor.get[RequestId]("id")
+        code    <- cursor.get[Int]("error.code")
         message <- cursor.get[String]("error.message")
-        data <- cursor.get[Option[Json]]("error.data")
+        data    <- cursor.get[Option[Json]]("error.data")
       yield Error(
         jsonrpc = jsonrpc,
-        id = id,
-        code = code,
+        id      = id,
+        code    = code,
         message = message,
-        data = data,
+        data    = data
       )
     }
 
     given Encoder[Error] = Encoder.instance { error =>
       Json.obj(
         "jsonrpc" -> error.jsonrpc.asJson,
-        "id" -> error.id.asJson,
+        "id"      -> error.id.asJson,
         "error" -> Json.obj(
-          "code" -> error.code.asJson,
+          "code"    -> error.code.asJson,
           "message" -> error.message.asJson,
-          "data" -> error.data.asJson,
-        ),
+          "data"    -> error.data.asJson
+        )
       )
     }
 
-  def failure(id: RequestId, code: Int,
-              message: String,
-              data: Option[Json]): JSONRPCResponse = Error(JSONRPC_VERSION, id, code, message, data)
+  def failure(id: RequestId, code: Int, message: String, data: Option[Json]): JSONRPCResponse =
+    Error(JSONRPC_VERSION, id, code, message, data)
   def success(id: RequestId, result: Json): JSONRPCResponse = Success(JSONRPC_VERSION, id, result)
