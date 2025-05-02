@@ -23,11 +23,6 @@ import mcp.schema.McpSchema.{
 
 object Result:
 
-  final case class ListResourcesResult(resources: List[Resource], nextCursor: Option[Cursor]) extends PaginatedResult
-  object ListResourcesResult:
-    given Decoder[ListResourcesResult] = Decoder.derived[ListResourcesResult]
-    given Encoder[ListResourcesResult] = Encoder.derived[ListResourcesResult].mapJson(_.dropNullValues)
-
   final case class ListResourceTemplatesResult(resourceTemplates: List[Resource], nextCursor: Option[Cursor])
     extends PaginatedResult
   object ListResourceTemplatesResult:

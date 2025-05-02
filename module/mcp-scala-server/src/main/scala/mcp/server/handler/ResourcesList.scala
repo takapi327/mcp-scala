@@ -14,6 +14,7 @@ import io.circe.*
 import io.circe.syntax.*
 
 import mcp.schema.*
+import mcp.schema.result.*
 
 import mcp.server.RequestHandler
 
@@ -24,4 +25,4 @@ case class ResourcesList[F[_]: Async](resources: List[McpSchema.ResourceHandler[
 
   override def handle(request: Json): F[Either[Throwable, Json]] =
     val statics = resources.map(_.resource).filter(_.isStatic)
-    Async[F].pure(Right(Result.ListResourcesResult(statics, None).asJson))
+    Async[F].pure(Right(ListResourcesResult(statics, None).asJson))
