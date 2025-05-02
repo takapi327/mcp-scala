@@ -13,7 +13,7 @@ import cats.effect.Async
 import io.circe.*
 import io.circe.syntax.*
 
-import mcp.schema.McpSchema
+import mcp.schema.*
 
 import mcp.server.RequestHandler
 
@@ -23,7 +23,7 @@ import mcp.server.RequestHandler
 case class PromptGet[F[_]: Async](prompts: List[McpSchema.PromptHandler[F]]) extends RequestHandler[F]:
 
   override def handle(request: Json): F[Either[Throwable, Json]] =
-    request.as[McpSchema.GetPromptRequest] match
+    request.as[Request.GetPromptRequest] match
       case Left(error) => Async[F].pure(Left(error))
       case Right(request) =>
         prompts.find(_.prompt.name == request.name) match

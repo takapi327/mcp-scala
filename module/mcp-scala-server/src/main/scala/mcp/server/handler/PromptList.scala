@@ -13,7 +13,7 @@ import cats.effect.Async
 import io.circe.*
 import io.circe.syntax.*
 
-import mcp.schema.McpSchema
+import mcp.schema.*
 
 import mcp.server.RequestHandler
 
@@ -23,4 +23,4 @@ import mcp.server.RequestHandler
 case class PromptList[F[_]: Async](prompts: List[McpSchema.PromptHandler[F]]) extends RequestHandler[F]:
 
   override def handle(request: Json): F[Either[Throwable, Json]] =
-    Async[F].pure(Right(McpSchema.ListPromptsResult(prompts.map(_.prompt), None).asJson))
+    Async[F].pure(Right(Result.ListPromptsResult(prompts.map(_.prompt), None).asJson))

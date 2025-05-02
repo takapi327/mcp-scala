@@ -6,7 +6,7 @@
 
 package mcp.server
 
-import mcp.schema.McpSchema.Method
+import mcp.schema.Method
 
 trait McpTransport[F[_]]:
 

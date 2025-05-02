@@ -8,7 +8,7 @@ package mcp.server
 
 import cats.effect.*
 
-import mcp.schema.{ McpError, McpSchema }
+import mcp.schema.*
 
 trait McpServer[F[_]]:
 
@@ -31,7 +31,7 @@ trait McpServer[F[_]]:
 object McpServer:
 
   private def voidTransport[F[_]: Async]: McpTransport[F] = new McpTransport[F]:
-    override def requestHandlers: Map[McpSchema.Method, RequestHandler[F]] = Map.empty
+    override def requestHandlers: Map[Method, RequestHandler[F]] = Map.empty
     override def handleRequest(): F[Unit]                                  = Async[F].unit
 
   def apply[F[_]: Async: LiftIO](name: String, version: String): McpServer[F] = Impl[F](
@@ -80,7 +80,7 @@ object McpServer:
     tools:        List[McpSchema.Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
     prompts:      List[McpSchema.PromptHandler[F]],
-    handlers:     Map[McpSchema.Method, RequestHandler[F]]
+    handlers:     Map[Method, RequestHandler[F]]
   ):
 
     private def handleProvider: RequestHandler.Provider[F] = new RequestHandler.Provider[F](
@@ -103,12 +103,16 @@ object McpServer:
     def setCapabilities(capabilities: McpSchema.ServerCapabilities): FastMcp[F] =
       this.copy(capabilities = capabilities)
 
-    def setRequestHandler(method: McpSchema.Method, requestHandler: RequestHandler[F]): FastMcp[F] =
+    def setRequestHandler(method: Method, requestHandler: RequestHandler[F]): FastMcp[F] =
       this.copy(handlers = handlers + (method -> requestHandler))
 
     def start(transportType: "stdio" | "sse"): F[Unit] =
       transportType match
-        case "stdio" => StdioMcpTransport(handleProvider.handlers, None, None).handleRequest()
+        case "stdio" => StdioMcpTransport(
+          handleProvider.handlers,
+          Some("/Users/takapi327/Development/oss/scala/mcp-scala/input.log"),
+          Some("/Users/takapi327/Development/oss/scala/mcp-scala/output.log")
+        ).handleRequest()
         case "sse"   => Async[F].raiseError(new McpError("SSE transport is not implemented yet"))
 
   object FastMcp:
