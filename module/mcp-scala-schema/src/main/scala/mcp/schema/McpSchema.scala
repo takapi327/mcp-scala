@@ -9,6 +9,8 @@ package mcp.schema
 import io.circe.*
 import io.circe.syntax.*
 
+import mcp.schema.request.*
+
 /**
  * Based on the <a href="http://www.jsonrpc.org/specification">JSON-RPC 2.0
  * specification</a> and the <a href=
@@ -222,7 +224,7 @@ object McpSchema:
 
     def resource: Resource
 
-    def readHandler: Request.ReadResourceRequest => F[Result.ReadResourceResult]
+    def readHandler: ReadResourceRequest => F[Result.ReadResourceResult]
 
   /**
    * Resource templates allow servers to expose parameterized resources using URI

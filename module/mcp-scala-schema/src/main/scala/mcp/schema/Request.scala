@@ -21,24 +21,6 @@ import mcp.schema.request.*
 
 object Request:
 
-  final case class ReadResourceRequest(uri: String) extends Request:
-    override def method: Method = Method.METHOD_RESOURCES_READ
-  object ReadResourceRequest:
-    given Decoder[ReadResourceRequest] = Decoder.instance { cursor =>
-      for {
-        uri <- cursor.get[String]("uri")
-      } yield ReadResourceRequest(uri)
-    }
-
-    given Encoder[ReadResourceRequest] = Encoder.instance { read =>
-      Json.obj(
-        "method" -> read.method.asJson,
-        "params" -> Json.obj(
-          "uri" -> read.uri.asJson
-        )
-      )
-    }
-
   /**
    * Sent from the client to request resources/updated notifications from the server whenever a particular resource changes.
    */

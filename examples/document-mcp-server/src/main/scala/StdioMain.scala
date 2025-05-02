@@ -9,6 +9,7 @@ import cats.effect.*
 import fs2.io.*
 
 import mcp.schema.*
+import mcp.schema.request.*
 
 import mcp.server.McpServer
 
@@ -22,7 +23,7 @@ object StdioMain extends IOApp.Simple:
       None,
       McpSchema.Annotations(List.empty, None)
     )
-    override def readHandler: Request.ReadResourceRequest => IO[Result.ReadResourceResult] =
+    override def readHandler: ReadResourceRequest => IO[Result.ReadResourceResult] =
       request =>
         file
           .Files[IO]
@@ -44,7 +45,7 @@ object StdioMain extends IOApp.Simple:
       McpSchema.Annotations(List.empty, None)
     )
 
-    override def readHandler: Request.ReadResourceRequest => IO[Result.ReadResourceResult] =
+    override def readHandler: ReadResourceRequest => IO[Result.ReadResourceResult] =
       request =>
         file
           .Files[IO]

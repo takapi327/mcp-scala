@@ -14,6 +14,7 @@ import io.circe.*
 import io.circe.syntax.*
 
 import mcp.schema.*
+import mcp.schema.request.*
 
 import mcp.server.RequestHandler
 
@@ -23,7 +24,7 @@ import mcp.server.RequestHandler
 case class ResourcesRead[F[_]: Async](resources: List[McpSchema.ResourceHandler[F]]) extends RequestHandler[F]:
 
   override def handle(request: Json): F[Either[Throwable, Json]] =
-    request.as[Request.ReadResourceRequest] match
+    request.as[ReadResourceRequest] match
       case Left(error) => Async[F].pure(Left(error))
       case Right(request) =>
         resources.find(_.resource match
