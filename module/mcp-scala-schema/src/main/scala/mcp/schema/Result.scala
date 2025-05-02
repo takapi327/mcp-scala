@@ -9,47 +9,19 @@ package mcp.schema
 import io.circe.*
 import io.circe.syntax.*
 
+import mcp.schema.result.*
 import mcp.schema.McpSchema.{
   Content,
-  Implementation,
   Prompt,
   PromptMessage,
   Resource,
   ResourceContents,
   Root,
-  ServerCapabilities,
   StopReason,
   ToolSchema
 }
 
-trait Result
-
 object Result:
-
-  trait PaginatedResult extends Result:
-    /**
-     * An opaque token representing the pagination position after the last returned result.
-     * If present, there may be more results available.
-     */
-    def nextCursor: Option[Cursor]
-
-  /**
-   * A response that indicates success but carries no data.
-   */
-  final case class Empty() extends Result
-
-  /**
-   * After receiving an initialize request from the client, the server sends this response.
-   */
-  final case class InitializeResult(
-    protocolVersion: String,
-    capabilities:    ServerCapabilities,
-    serverInfo:      Implementation,
-    instructions:    Option[String]
-  ) extends Result
-  object InitializeResult:
-    given Decoder[InitializeResult] = Decoder.derived[InitializeResult]
-    given Encoder[InitializeResult] = Encoder.derived[InitializeResult]
 
   final case class ListResourcesResult(resources: List[Resource], nextCursor: Option[Cursor]) extends PaginatedResult
   object ListResourcesResult:
