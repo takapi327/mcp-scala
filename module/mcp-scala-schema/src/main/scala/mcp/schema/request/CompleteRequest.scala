@@ -10,10 +10,7 @@ package request
 import io.circe.*
 import io.circe.syntax.*
 
-import mcp.schema.McpSchema.{
-  CompleteArgument,
-  PromptOrResourceReference,
-}
+import mcp.schema.McpSchema.{ CompleteArgument, PromptOrResourceReference }
 
 final case class CompleteRequest(ref: PromptOrResourceReference, argument: CompleteArgument) extends Request:
   override def method: Method = Method.METHOD_COMPLETION_COMPLETE
@@ -21,7 +18,7 @@ final case class CompleteRequest(ref: PromptOrResourceReference, argument: Compl
 object CompleteRequest:
   given Decoder[CompleteRequest] = Decoder.instance { cursor =>
     for {
-      ref <- cursor.get[PromptOrResourceReference]("ref")
+      ref      <- cursor.get[PromptOrResourceReference]("ref")
       argument <- cursor.get[CompleteArgument]("argument")
     } yield CompleteRequest(ref, argument)
   }
@@ -31,7 +28,7 @@ object CompleteRequest:
       .obj(
         "method" -> complete.method.asJson,
         "params" -> Json.obj(
-          "ref" -> complete.ref.asJson,
+          "ref"      -> complete.ref.asJson,
           "argument" -> complete.argument.asJson
         )
       )

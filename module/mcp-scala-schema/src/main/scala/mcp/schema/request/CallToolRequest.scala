@@ -16,7 +16,7 @@ final case class CallToolRequest(name: String, arguments: Option[Json]) extends 
 object CallToolRequest:
   given Decoder[CallToolRequest] = Decoder.instance { cursor =>
     for {
-      name <- cursor.get[String]("name")
+      name      <- cursor.get[String]("name")
       arguments <- cursor.get[Option[Json]]("arguments")
     } yield CallToolRequest(name, arguments)
   }
@@ -26,7 +26,7 @@ object CallToolRequest:
       .obj(
         "method" -> call.method.asJson,
         "params" -> Json.obj(
-          "name" -> call.name.asJson,
+          "name"      -> call.name.asJson,
           "arguments" -> call.arguments.asJson
         )
       )

@@ -19,7 +19,7 @@ final case class GetPromptRequest(name: String, arguments: Option[Map[String, Js
 object GetPromptRequest:
   given Decoder[GetPromptRequest] = Decoder.instance { cursor =>
     for {
-      name <- cursor.get[String]("name")
+      name      <- cursor.get[String]("name")
       arguments <- cursor.get[Option[Map[String, Json]]]("arguments")
     } yield GetPromptRequest(name, arguments)
   }
@@ -28,7 +28,7 @@ object GetPromptRequest:
     Json.obj(
       "method" -> get.method.asJson,
       "params" -> Json.obj(
-        "name" -> get.name.asJson,
+        "name"      -> get.name.asJson,
         "arguments" -> get.arguments.asJson
       )
     )
