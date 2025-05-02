@@ -11,32 +11,11 @@ import io.circe.syntax.*
 
 import mcp.schema.result.*
 import mcp.schema.McpSchema.{
-  Content,
   Root,
   StopReason
 }
 
 object Result:
-
-  /**
-   * The server's response to a tool call.
-   *
-   * Any errors that originate from the tool SHOULD be reported inside the result
-   * object, with `isError` set to true, _not_ as an MCP protocol-level error
-   * response. Otherwise, the LLM would not be able to see that an error occurred
-   * and self-correct.
-   *
-   * However, any errors in _finding_ the tool, an error indicating that the
-   * server does not support tool calls, or any other exceptional conditions,
-   * should be reported as an MCP error response.
-   */
-  final case class CallToolResult(
-    content: List[Content],
-    isError: Option[Boolean]
-  ) extends Result
-  object CallToolResult:
-    given Decoder[CallToolResult] = Decoder.derived[CallToolResult]
-    given Encoder[CallToolResult] = Encoder.derived[CallToolResult].mapJson(_.dropNullValues)
 
   /**
    * The client's response to a sampling/create_message request from the server. The client should inform the user before returning the sampled message, to allow them to inspect the response (human in the loop) and decide whether to allow the server to see it.

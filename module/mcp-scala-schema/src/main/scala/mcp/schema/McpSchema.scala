@@ -530,7 +530,7 @@ object McpSchema:
   final case class Tool[F[_], T: JsonSchema: Decoder](
     name:        String,
     description: String,
-    execute:     T => F[mcp.schema.Result.CallToolResult]
+    execute:     T => F[CallToolResult]
   ) extends ToolSchema:
 
     override def inputSchema: Json = summon[JsonSchema[T]].asJson

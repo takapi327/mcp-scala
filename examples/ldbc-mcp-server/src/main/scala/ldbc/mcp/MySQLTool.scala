@@ -11,6 +11,7 @@ import cats.effect.*
 import io.circe.*
 
 import mcp.schema.*
+import mcp.schema.result.*
 
 import ldbc.connector.*
 
@@ -40,6 +41,6 @@ object MySQLTool:
               s"Columns: ${ columns.mkString(", ") }\nRecords: ${ records.map(_.map(_.getOrElse("NULL")).mkString(", ")).mkString("\n") }"
             )
           )
-          Result.CallToolResult(contents, None)
+          CallToolResult(contents, None)
       }
   )
