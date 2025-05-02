@@ -22,29 +22,6 @@ import mcp.schema.request.*
 object Request:
 
   /**
-   * Used by the client to get a prompt provided by the server.
-   */
-  final case class GetPromptRequest(name: String, arguments: Option[Map[String, Json]]) extends Request:
-    override def method: Method = Method.METHOD_PROMPT_GET
-  object GetPromptRequest:
-    given Decoder[GetPromptRequest] = Decoder.instance { cursor =>
-      for {
-        name      <- cursor.get[String]("name")
-        arguments <- cursor.get[Option[Map[String, Json]]]("arguments")
-      } yield GetPromptRequest(name, arguments)
-    }
-
-    given Encoder[GetPromptRequest] = Encoder.instance { get =>
-      Json.obj(
-        "method" -> get.method.asJson,
-        "params" -> Json.obj(
-          "name"      -> get.name.asJson,
-          "arguments" -> get.arguments.asJson
-        )
-      )
-    }
-
-  /**
    * Sent from the client to request a list of tools the server has.
    */
   final case class ListToolsRequest(cursor: Option[Cursor]) extends PaginatedRequest:
