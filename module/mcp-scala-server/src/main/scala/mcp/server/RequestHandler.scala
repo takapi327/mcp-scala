@@ -14,6 +14,7 @@ import io.circe.*
 import io.circe.syntax.*
 
 import mcp.schema.*
+import mcp.schema.request.*
 
 import mcp.server.handler.*
 
@@ -63,7 +64,7 @@ object RequestHandler:
   ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
-      request.as[Request.InitializeRequest] match
+      request.as[InitializeRequest] match
         case Left(error) => Async[F].pure(Left(error))
         case Right(initializeRequest) =>
           val response = Result.InitializeResult(

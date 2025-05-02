@@ -8,6 +8,8 @@ package mcp.schema
 
 import io.circe.*
 
+import mcp.schema.request.Request
+
 /**
  * A request that expects a response.
  */

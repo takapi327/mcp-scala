@@ -10,52 +10,16 @@ import io.circe.*
 import io.circe.syntax.*
 
 import mcp.schema.McpSchema.{
-  ClientCapabilities,
   CompleteArgument,
   ContextInclusionStrategy,
-  Implementation,
   ModelPreferences,
   PromptOrResourceReference,
   SamplingMessage
 }
 
-trait Request:
-
-  def method: Method
+import mcp.schema.request.*
 
 object Request:
-
-  trait PaginatedRequest extends Request:
-    def cursor: Option[Cursor]
-
-  /**
-   * This request is sent from the client to the server when it first connects, asking it to begin initialization.
-   */
-  final case class InitializeRequest(
-    protocolVersion: String,
-    capabilities:    ClientCapabilities,
-    clientInfo:      Implementation
-  ) extends Request:
-    override def method: Method = Method.METHOD_INITIALIZE
-  object InitializeRequest:
-    given Decoder[InitializeRequest] = Decoder.instance { cursor =>
-      for
-        protocolVersion <- cursor.get[String]("protocolVersion")
-        capabilities    <- cursor.get[ClientCapabilities]("capabilities")
-        clientInfo      <- cursor.get[Implementation]("clientInfo")
-      yield InitializeRequest(protocolVersion, capabilities, clientInfo)
-    }
-
-    given Encoder[InitializeRequest] = Encoder.instance { init =>
-      Json.obj(
-        "method" -> init.method.asJson,
-        "params" -> Json.obj(
-          "protocolVersion" -> init.protocolVersion.asJson,
-          "capabilities"    -> init.capabilities.asJson,
-          "clientInfo"      -> init.clientInfo.asJson
-        )
-      )
-    }
 
   /**
    * A ping, issued by either the server or the client, to check that the other party is still alive. The receiver must promptly respond, or else may be disconnected.
