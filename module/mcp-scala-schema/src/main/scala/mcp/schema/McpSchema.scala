@@ -10,6 +10,7 @@ import io.circe.*
 import io.circe.syntax.*
 
 import mcp.schema.request.*
+import mcp.schema.result.*
 
 /**
  * Based on the <a href="http://www.jsonrpc.org/specification">JSON-RPC 2.0
@@ -224,7 +225,7 @@ object McpSchema:
 
     def resource: Resource
 
-    def readHandler: ReadResourceRequest => F[Result.ReadResourceResult]
+    def readHandler: ReadResourceRequest => F[ReadResourceResult]
 
   /**
    * Resource templates allow servers to expose parameterized resources using URI
@@ -391,7 +392,7 @@ object McpSchema:
 
   case class PromptHandler[F[_]](
     prompt:  Prompt,
-    handler: GetPromptRequest => F[Result.GetPromptResult]
+    handler: GetPromptRequest => F[mcp.schema.Result.GetPromptResult]
   )
 
   // ---------------------------
@@ -529,7 +530,7 @@ object McpSchema:
   final case class Tool[F[_], T: JsonSchema: Decoder](
     name:        String,
     description: String,
-    execute:     T => F[Result.CallToolResult]
+    execute:     T => F[mcp.schema.Result.CallToolResult]
   ) extends ToolSchema:
 
     override def inputSchema: Json = summon[JsonSchema[T]].asJson

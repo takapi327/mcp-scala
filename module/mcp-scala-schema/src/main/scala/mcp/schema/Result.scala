@@ -14,21 +14,12 @@ import mcp.schema.McpSchema.{
   Content,
   Prompt,
   PromptMessage,
-  ResourceContents,
   Root,
   StopReason,
   ToolSchema
 }
 
 object Result:
-
-  /**
-   * The server's response to a resources/read request from the client.
-   */
-  final case class ReadResourceResult(contents: List[ResourceContents]) extends Result
-  object ReadResourceResult:
-    given Decoder[ReadResourceResult] = Decoder.derived[ReadResourceResult]
-    given Encoder[ReadResourceResult] = Encoder.derived[ReadResourceResult]
 
   /**
    * The server's response to a prompts/list request from the client.

@@ -10,6 +10,7 @@ import fs2.io.*
 
 import mcp.schema.*
 import mcp.schema.request.*
+import mcp.schema.result.*
 
 import mcp.server.McpServer
 
@@ -23,7 +24,7 @@ object StdioMain extends IOApp.Simple:
       None,
       McpSchema.Annotations(List.empty, None)
     )
-    override def readHandler: ReadResourceRequest => IO[Result.ReadResourceResult] =
+    override def readHandler: ReadResourceRequest => IO[ReadResourceResult] =
       request =>
         file
           .Files[IO]
@@ -31,7 +32,7 @@ object StdioMain extends IOApp.Simple:
           .compile
           .toList
           .map { contents =>
-            Result.ReadResourceResult(
+            ReadResourceResult(
               contents.map(content => McpSchema.TextResourceContents(request.uri, "text/markdown", content))
             )
           }
@@ -45,7 +46,7 @@ object StdioMain extends IOApp.Simple:
       McpSchema.Annotations(List.empty, None)
     )
 
-    override def readHandler: ReadResourceRequest => IO[Result.ReadResourceResult] =
+    override def readHandler: ReadResourceRequest => IO[ReadResourceResult] =
       request =>
         file
           .Files[IO]
@@ -53,7 +54,7 @@ object StdioMain extends IOApp.Simple:
           .compile
           .toList
           .map { contents =>
-            Result.ReadResourceResult(
+            ReadResourceResult(
               contents.map(content => McpSchema.TextResourceContents(request.uri, "text/markdown", content))
             )
           }
@@ -78,7 +79,7 @@ object StdioMain extends IOApp.Simple:
         case None => IO.raiseError(new Exception("Code argument is required"))
         case Some(code) =>
           val content = McpSchema.Content.text(s"Please review this Scala code:\n\n$code")
-          val result = Result.GetPromptResult(
+          val result = mcp.schema.Result.GetPromptResult(
             Some("Code review prompt"),
             List(
               McpSchema.PromptMessage(
