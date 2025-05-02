@@ -21,18 +21,6 @@ import mcp.schema.request.*
 
 object Request:
 
-  /**
-   * A ping, issued by either the server or the client, to check that the other party is still alive. The receiver must promptly respond, or else may be disconnected.
-   */
-  final case class PingRequest() extends Request:
-    override def method: Method = Method.METHOD_PING
-  object PingRequest:
-    given Decoder[PingRequest] = Decoder.derived[PingRequest]
-    given Encoder[PingRequest] = Encoder.instance { ping =>
-      Json.obj(
-        "method" -> ping.method.asJson
-      )
-    }
 
   final case class ListResourcesRequest(cursor: Option[Cursor]) extends PaginatedRequest:
     override def method: Method = Method.METHOD_RESOURCES_LIST
