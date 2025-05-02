@@ -98,7 +98,7 @@ object RequestHandler:
   ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
-      val response = mcp.schema.Result.ListToolsResult(tools, None)
+      val response = ListToolsResult(tools, None)
       Async[F].pure(Right(response.asJson))
 
   /**

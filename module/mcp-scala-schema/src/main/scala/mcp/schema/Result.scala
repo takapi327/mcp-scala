@@ -13,18 +13,10 @@ import mcp.schema.result.*
 import mcp.schema.McpSchema.{
   Content,
   Root,
-  StopReason,
-  ToolSchema
+  StopReason
 }
 
 object Result:
-
-  /**
-   * The server's response to a tools/list request from the client.
-   */
-  final case class ListToolsResult(tools: List[ToolSchema], nextCursor: Option[Cursor]) extends PaginatedResult
-  object ListToolsResult:
-    given Encoder[ListToolsResult] = Encoder.derived[ListToolsResult].mapJson(_.dropNullValues)
 
   /**
    * The server's response to a tool call.
