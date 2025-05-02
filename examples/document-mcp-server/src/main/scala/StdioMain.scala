@@ -79,7 +79,7 @@ object StdioMain extends IOApp.Simple:
         case None => IO.raiseError(new Exception("Code argument is required"))
         case Some(code) =>
           val content = McpSchema.Content.text(s"Please review this Scala code:\n\n$code")
-          val result = mcp.schema.Result.GetPromptResult(
+          val result = GetPromptResult(
             Some("Code review prompt"),
             List(
               McpSchema.PromptMessage(

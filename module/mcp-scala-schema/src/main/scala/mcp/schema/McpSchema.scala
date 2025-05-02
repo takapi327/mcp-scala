@@ -392,7 +392,7 @@ object McpSchema:
 
   case class PromptHandler[F[_]](
     prompt:  Prompt,
-    handler: GetPromptRequest => F[mcp.schema.Result.GetPromptResult]
+    handler: GetPromptRequest => F[GetPromptResult]
   )
 
   // ---------------------------

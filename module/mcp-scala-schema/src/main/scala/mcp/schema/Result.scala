@@ -12,21 +12,12 @@ import io.circe.syntax.*
 import mcp.schema.result.*
 import mcp.schema.McpSchema.{
   Content,
-  PromptMessage,
   Root,
   StopReason,
   ToolSchema
 }
 
 object Result:
-
-  /**
-   * The server's response to a prompts/get request from the client.
-   */
-  final case class GetPromptResult(description: Option[String], messages: List[PromptMessage]) extends Result
-  object GetPromptResult:
-    given Decoder[GetPromptResult] = Decoder.derived[GetPromptResult]
-    given Encoder[GetPromptResult] = Encoder.derived[GetPromptResult]
 
   /**
    * The server's response to a tools/list request from the client.
