@@ -10,7 +10,6 @@ package request
 import io.circe.*
 import io.circe.syntax.*
 
-import mcp.schema.McpSchema.{ModelPreferences}
 import mcp.schema.result.SamplingMessage
 
 /**

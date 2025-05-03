@@ -102,20 +102,6 @@ object McpSchema:
     def decode(arguments: Json): Decoder.Result[T] =
       summon[Decoder[T]].decodeJson(arguments)
 
-  final case class ModelHint(name: String)
-  object ModelHint:
-    given Decoder[ModelHint] = Decoder.derived[ModelHint]
-    given Encoder[ModelHint] = Encoder.derived[ModelHint]
-
   // ---------------------------
   // Sampling Interfaces
   // ---------------------------
-  final case class ModelPreferences(
-    hints:                List[ModelHint],
-    costPriority:         Double,
-    speedPriority:        Double,
-    intelligencePriority: Double
-  )
-  object ModelPreferences:
-    given Decoder[ModelPreferences] = Decoder.derived[ModelPreferences]
-    given Encoder[ModelPreferences] = Encoder.derived[ModelPreferences]
