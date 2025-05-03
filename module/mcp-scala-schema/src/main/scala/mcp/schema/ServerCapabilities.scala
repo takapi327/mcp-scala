@@ -42,7 +42,7 @@ final case class ServerCapabilities(
 
 object ServerCapabilities:
   
-  def apply(): ServerCapabilities = ServerCapabilities(
+  def build(): ServerCapabilities = ServerCapabilities(
     experimental = None,
     logging = None,
     completions = None,

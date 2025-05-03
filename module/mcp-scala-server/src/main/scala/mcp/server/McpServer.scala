@@ -12,7 +12,7 @@ import mcp.schema.*
 
 trait McpServer[F[_]]:
 
-  def serverInfo: McpSchema.Implementation
+  def serverInfo: Implementation
 
   def capabilities: ServerCapabilities
 
@@ -35,8 +35,8 @@ object McpServer:
     override def handleRequest(): F[Unit]                        = Async[F].unit
 
   def apply[F[_]: Async: LiftIO](name: String, version: String): McpServer[F] = Impl[F](
-    McpSchema.Implementation(name, version),
-    ServerCapabilities()
+    Implementation(name, version),
+    ServerCapabilities.build()
       .withPromptsListChanged(false)
       .withToolsListChanged(false),
     List.empty,
@@ -46,7 +46,7 @@ object McpServer:
   )
 
   private case class Impl[F[_]](
-    serverInfo:   McpSchema.Implementation,
+    serverInfo:   Implementation,
     capabilities: ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
@@ -73,7 +73,7 @@ object McpServer:
       transport.handleRequest()
 
   case class FastMcp[F[_]: Async: LiftIO](
-    serverInfo:   McpSchema.Implementation,
+    serverInfo:   Implementation,
     capabilities: ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
@@ -117,8 +117,8 @@ object McpServer:
   object FastMcp:
 
     def apply[F[_]: Async: LiftIO](name: String, version: String): FastMcp[F] =
-      val serverInfo = McpSchema.Implementation(name, version)
-      val capabilities = ServerCapabilities()
+      val serverInfo = Implementation(name, version)
+      val capabilities = ServerCapabilities.build()
         .withPromptsListChanged(false)
         .withToolsListChanged(false)
       val handleProvider = new RequestHandler.Provider[F](

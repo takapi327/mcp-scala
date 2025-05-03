@@ -9,8 +9,6 @@ package result
 
 import io.circe.*
 
-import mcp.schema.McpSchema.{ Implementation }
-
 /**
  * After receiving an initialize request from the client, the server sends this response.
  */

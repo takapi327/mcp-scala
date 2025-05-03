@@ -10,8 +10,6 @@ package request
 import io.circe.*
 import io.circe.syntax.*
 
-import mcp.schema.McpSchema.{ Implementation }
-
 /**
  * This request is sent from the client to the server when it first connects, asking it to begin initialization.
  */

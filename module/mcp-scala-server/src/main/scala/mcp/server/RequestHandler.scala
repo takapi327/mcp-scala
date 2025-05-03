@@ -26,7 +26,7 @@ trait RequestHandler[F[_]]:
 object RequestHandler:
 
   class Provider[F[_]: Async](
-    serverInfo:   McpSchema.Implementation,
+    serverInfo:   Implementation,
     capabilities: ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
@@ -60,7 +60,7 @@ object RequestHandler:
       )
 
   final case class Initialize[F[_]: Async](
-    serverInfo:   McpSchema.Implementation,
+    serverInfo:   Implementation,
     capabilities: ServerCapabilities
   ) extends RequestHandler[F]:
 
@@ -92,7 +92,7 @@ object RequestHandler:
    * @tparam F
    */
   final case class ListTools[F[_]: Async](
-    serverInfo:   McpSchema.Implementation,
+    serverInfo:   Implementation,
     capabilities: ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]]
   ) extends RequestHandler[F]:
@@ -111,7 +111,7 @@ object RequestHandler:
    * @tparam F
    */
   final case class CallTools[F[_]: Async](
-    serverInfo:   McpSchema.Implementation,
+    serverInfo:   Implementation,
     capabilities: ServerCapabilities,
     tools:        List[McpSchema.Tool[F, ?]]
   ) extends RequestHandler[F]:

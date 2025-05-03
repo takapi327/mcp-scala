@@ -23,13 +23,6 @@ import mcp.schema.result.*
 object McpSchema:
 
 
-  final case class Implementation(
-    name:    String,
-    version: String
-  )
-  object Implementation:
-    given Decoder[Implementation] = Decoder.derived[Implementation]
-    given Encoder[Implementation] = Encoder.derived[Implementation]
 
   enum Role:
     case USER, ASSISTANT
