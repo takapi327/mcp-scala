@@ -23,11 +23,6 @@ import mcp.schema.result.*
 object McpSchema:
 
 
-  final case class LoggingCapabilities()
-  object LoggingCapabilities:
-    given Decoder[LoggingCapabilities] = Decoder.derived[LoggingCapabilities]
-    given Encoder[LoggingCapabilities] = Encoder.derived[LoggingCapabilities]
-
   final case class PromptCapabilities(listChanged: Boolean)
   object PromptCapabilities:
     given Decoder[PromptCapabilities] = Decoder.derived[PromptCapabilities]
