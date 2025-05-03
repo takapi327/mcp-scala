@@ -18,9 +18,9 @@ import io.circe.*
  * @param content The content of the message of type [[Content]].
  */
 final case class PromptMessage(
-                                role: Role,
-                                content: Content
-                              )
+  role:    Role,
+  content: Content
+)
 
 object PromptMessage:
   given Decoder[PromptMessage] = Decoder.derived[PromptMessage]

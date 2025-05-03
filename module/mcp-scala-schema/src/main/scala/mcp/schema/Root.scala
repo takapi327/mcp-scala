@@ -19,9 +19,9 @@ import io.circe.*
  *             for referencing the root in other parts of the application.
  */
 final case class Root(
-                       uri: String,
-                       name: Option[String]
-                     )
+  uri:  String,
+  name: Option[String]
+)
 
 object Root:
   given Decoder[Root] = Decoder.derived[Root]

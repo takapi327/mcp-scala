@@ -26,7 +26,7 @@ sealed trait ToolSchema:
 object ToolSchema:
   given Encoder[ToolSchema] = Encoder.instance { tool =>
     Json.obj(
-      "name" -> Json.fromString(tool.name),
+      "name"        -> Json.fromString(tool.name),
       "description" -> Json.fromString(tool.description),
       "inputSchema" -> tool.inputSchema
     )
@@ -38,7 +38,7 @@ object ToolSchema:
  * external systems, perform computations, and take actions in the real world.
  */
 sealed trait Tool[F[_], T: JsonSchema: Decoder] extends ToolSchema:
-  def execute:     T => F[CallToolResult]
+  def execute:                 T => F[CallToolResult]
   def decode(arguments: Json): Decoder.Result[T]
 
 object Tool:

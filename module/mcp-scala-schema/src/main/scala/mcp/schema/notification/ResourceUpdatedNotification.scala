@@ -20,7 +20,7 @@ object ResourceUpdatedNotification:
   given Decoder[ResourceUpdatedNotification] = Decoder.instance { cursor =>
     for {
       method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED)
-      uri <- cursor.get[String]("uri")
+      uri    <- cursor.get[String]("uri")
     } yield
       if method then ResourceUpdatedNotification(uri)
       else throw new Exception("Invalid method for ResourceUpdatedNotification")

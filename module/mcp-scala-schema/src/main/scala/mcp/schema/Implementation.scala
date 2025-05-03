@@ -9,9 +9,9 @@ package mcp.schema
 import io.circe.*
 
 final case class Implementation(
-                                 name: String,
-                                 version: String
-                               )
+  name:    String,
+  version: String
+)
 
 object Implementation:
   given Decoder[Implementation] = Decoder.derived[Implementation]

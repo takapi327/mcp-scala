@@ -16,16 +16,16 @@ sealed trait Content:
 object Content:
   given Decoder[Content] = Decoder.instance { c =>
     c.get[String]("type").flatMap {
-      case "text" => c.as[Text]
-      case "image" => c.as[Image]
+      case "text"     => c.as[Text]
+      case "image"    => c.as[Image]
       case "resource" => c.as[Embedded]
-      case _ => Left(DecodingFailure("Unknown content type", c.history))
+      case _          => Left(DecodingFailure("Unknown content type", c.history))
     }
   }
 
   given Encoder[Content] = Encoder.instance {
-    case text: Text => text.asJson
-    case image: Image => image.asJson
+    case text: Text         => text.asJson
+    case image: Image       => image.asJson
     case resource: Embedded => resource.asJson
   }
 
@@ -36,10 +36,10 @@ object Content:
     Embedded(audience, priority, resource)
 
   final case class Text(
-                                audience: Option[List[Role]],
-                                priority: Option[Double],
-                                text:     String
-                              ) extends Content:
+    audience: Option[List[Role]],
+    priority: Option[Double],
+    text:     String
+  ) extends Content:
     override def `type`: String = "text"
 
   object Text:
@@ -56,23 +56,22 @@ object Content:
     }
 
   final case class Image(
-                                 audience: List[Role],
-                                 priority: Double,
-                                 data:     String,
-                                 mimeType: String
-                               ) extends Content:
+    audience: List[Role],
+    priority: Double,
+    data:     String,
+    mimeType: String
+  ) extends Content:
     override def `type`: String = "image"
 
   object Image:
     given Decoder[Image] = Decoder.derived[Image]
     given Encoder[Image] = Encoder.derived[Image]
 
-
   final case class Embedded(
-                                     audience: List[Role],
-                                     priority: Double,
-                                     resource: ResourceContents
-                                   ) extends Content:
+    audience: List[Role],
+    priority: Double,
+    resource: ResourceContents
+  ) extends Content:
     override def `type`: String = "resource"
 
   object Embedded:

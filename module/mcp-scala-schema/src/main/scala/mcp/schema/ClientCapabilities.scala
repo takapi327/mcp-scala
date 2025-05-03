@@ -23,10 +23,10 @@ import io.circe.*
  *
  */
 final case class ClientCapabilities(
-                                     experimental: Option[Map[String, Json]],
-                                     roots: Option[RootCapabilities],
-                                     sampling: Option[Sampling]
-                                   )
+  experimental: Option[Map[String, Json]],
+  roots:        Option[RootCapabilities],
+  sampling:     Option[Sampling]
+)
 
 object ClientCapabilities:
   given Decoder[ClientCapabilities] = Decoder.derived[ClientCapabilities]

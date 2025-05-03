@@ -16,10 +16,10 @@ import io.circe.*
  * @param required    Whether this argument must be provided.
  */
 final case class PromptArgument(
-                                 name: String,
-                                 description: String,
-                                 required: Boolean
-                               )
+  name:        String,
+  description: String,
+  required:    Boolean
+)
 
 object PromptArgument:
   given Decoder[PromptArgument] = Decoder.derived[PromptArgument]

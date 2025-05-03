@@ -21,9 +21,9 @@ object LoggingMessageNotification:
   given Decoder[LoggingMessageNotification] = Decoder.instance { cursor =>
     for {
       method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_MESSAGE)
-      level <- cursor.get[LoggingLevel]("level")
+      level  <- cursor.get[LoggingLevel]("level")
       logger <- cursor.get[Option[String]]("logger")
-      data <- cursor.get[Json]("data")
+      data   <- cursor.get[Json]("data")
     } yield
       if method then LoggingMessageNotification(level, logger, data)
       else throw new Exception("Invalid method for LoggingMessageNotification")
@@ -33,9 +33,9 @@ object LoggingMessageNotification:
     Json.obj(
       "method" -> message.method.asJson,
       "params" -> Json.obj(
-        "level" -> message.level.asJson,
+        "level"  -> message.level.asJson,
         "logger" -> message.logger.asJson,
-        "data" -> message.data.asJson
+        "data"   -> message.data.asJson
       )
     )
   }

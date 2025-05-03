@@ -26,19 +26,19 @@ package object result:
      * If present, there may be more results available.
      */
     def nextCursor: Option[Cursor]
-    
+
   trait SamplingMessage:
-    
+
     def role: Role
-    
+
     def content: Content
-    
+
   object SamplingMessage:
-    
+
     private case class Impl(role: Role, content: Content) extends SamplingMessage
-    
+
     def apply(role: Role, content: Content): SamplingMessage = Impl(role, content)
-    
+
     given Decoder[SamplingMessage] = Decoder.instance { cursor =>
       for {
         role    <- cursor.get[Role]("role")

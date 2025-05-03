@@ -14,21 +14,21 @@ import io.circe.syntax.*
  * An out-of-band notification used to inform the receiver of a progress update for a long-running request.
  */
 final case class ProgressNotification(
-                                       progressToken: ProgressToken,
-                                       progress: Int,
-                                       total: Option[Int],
-                                       message: Option[String]
-                                     ) extends Notification:
+  progressToken: ProgressToken,
+  progress:      Int,
+  total:         Option[Int],
+  message:       Option[String]
+) extends Notification:
   override def method: Method = Method.METHOD_NOTIFICATION_PROGRESS
 
 object ProgressNotification:
   given Decoder[ProgressNotification] = Decoder.instance { cursor =>
     for {
-      method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_PROGRESS)
+      method        <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_PROGRESS)
       progressToken <- cursor.get[ProgressToken]("progressToken")
-      progress <- cursor.get[Int]("progress")
-      total <- cursor.get[Option[Int]]("total")
-      message <- cursor.get[Option[String]]("message")
+      progress      <- cursor.get[Int]("progress")
+      total         <- cursor.get[Option[Int]]("total")
+      message       <- cursor.get[Option[String]]("message")
     } yield
       if method then ProgressNotification(progressToken, progress, total, message)
       else throw new Exception("Invalid method for ProgressNotification")
@@ -39,9 +39,9 @@ object ProgressNotification:
       "method" -> progress.method.asJson,
       "params" -> Json.obj(
         "progressToken" -> progress.progressToken.asJson,
-        "progress" -> progress.progress.asJson,
-        "total" -> progress.total.asJson,
-        "message" -> progress.message.asJson
+        "progress"      -> progress.progress.asJson,
+        "total"         -> progress.total.asJson,
+        "message"       -> progress.message.asJson
       )
     )
   }

@@ -23,20 +23,20 @@ trait McpResource:
 object McpResource:
 
   def static(
-              uri: String,
-              name: String,
-              description: Option[String],
-              mimeType: Option[String],
-              annotations: Annotations
-            ): Static = Static(uri, name, description, mimeType, annotations)
-  
+    uri:         String,
+    name:        String,
+    description: Option[String],
+    mimeType:    Option[String],
+    annotations: Annotations
+  ): Static = Static(uri, name, description, mimeType, annotations)
+
   def template(
-               uriTemplate: String,
-               name:        String,
-               description: Option[String],
-               mimeType:    Option[String],
-               annotations: Annotations
-             ): Template = Template(uriTemplate, name, description, mimeType, annotations)
+    uriTemplate: String,
+    name:        String,
+    description: Option[String],
+    mimeType:    Option[String],
+    annotations: Annotations
+  ): Template = Template(uriTemplate, name, description, mimeType, annotations)
 
   given Decoder[McpResource] = List[Decoder[McpResource]](
     Decoder[Static].widen,
@@ -44,7 +44,7 @@ object McpResource:
   ).reduceLeft(_ or _)
 
   given Encoder[McpResource] = Encoder.instance {
-    case static: Static => static.asJson
+    case static: Static     => static.asJson
     case template: Template => template.asJson
   }
 
@@ -62,12 +62,12 @@ object McpResource:
    *                    annotations to inform how objects are used or displayed.
    */
   final case class Static(
-                           uri: String,
-                           name: String,
-                           description: Option[String],
-                           mimeType: Option[String],
-                           annotations: Annotations
-                         ) extends McpResource:
+    uri:         String,
+    name:        String,
+    description: Option[String],
+    mimeType:    Option[String],
+    annotations: Annotations
+  ) extends McpResource:
     override private[mcp] def isStatic: Boolean = true
 
   object Static:
@@ -91,12 +91,12 @@ object McpResource:
    * @see <a href="https://datatracker.ietf.org/doc/html/rfc6570">RFC 6570</a>
    */
   final case class Template(
-                                     uriTemplate: String,
-                                     name:        String,
-                                     description: Option[String],
-                                     mimeType:    Option[String],
-                                     annotations: Annotations
-                                   ) extends McpResource:
+    uriTemplate: String,
+    name:        String,
+    description: Option[String],
+    mimeType:    Option[String],
+    annotations: Annotations
+  ) extends McpResource:
 
     override private[mcp] def isStatic: Boolean = false
 

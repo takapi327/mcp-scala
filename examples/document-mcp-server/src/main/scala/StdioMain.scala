@@ -9,9 +9,9 @@ import cats.effect.*
 import fs2.io.*
 
 import mcp.schema.*
+import mcp.schema.handler.*
 import mcp.schema.request.*
 import mcp.schema.result.*
-import mcp.schema.handler.*
 
 import mcp.server.McpServer
 

@@ -14,9 +14,9 @@ import io.circe.*
 import io.circe.syntax.*
 
 import mcp.schema.*
+import mcp.schema.handler.*
 import mcp.schema.request.*
 import mcp.schema.result.*
-import mcp.schema.handler.*
 
 import mcp.server.handler.*
 

@@ -20,7 +20,7 @@ object InitializedNotification:
   given Decoder[InitializedNotification] = Decoder.instance { cursor =>
     cursor.get[Method]("method").map {
       case Method.METHOD_NOTIFICATION_INITIALIZED => InitializedNotification()
-      case _ => throw new Exception("Invalid method for InitializedNotification")
+      case _                                      => throw new Exception("Invalid method for InitializedNotification")
     }
   }
 

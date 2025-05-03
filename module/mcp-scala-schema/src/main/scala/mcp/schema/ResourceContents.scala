@@ -30,7 +30,7 @@ object ResourceContents:
     c.get[String]("type").flatMap {
       case "text" => c.as[Text]
       case "blob" => c.as[Blob]
-      case _ => Left(DecodingFailure("Unknown resource type", c.history))
+      case _      => Left(DecodingFailure("Unknown resource type", c.history))
     }
   }
 
@@ -48,10 +48,10 @@ object ResourceContents:
    *                 actually be represented as text (not binary data).
    */
   final case class Text(
-                         uri:      String,
-                         mimeType: String,
-                         text:     String
-                       ) extends ResourceContents
+    uri:      String,
+    mimeType: String,
+    text:     String
+  ) extends ResourceContents
 
   object Text:
     given Decoder[Text] = Decoder.derived[Text]
@@ -67,10 +67,10 @@ object ResourceContents:
    *                 (not text).
    */
   final case class Blob(
-                                         uri:      String,
-                                         mimeType: String,
-                                         blob:     String
-                                       ) extends ResourceContents
+    uri:      String,
+    mimeType: String,
+    blob:     String
+  ) extends ResourceContents
   object Blob:
     given Decoder[Blob] = Decoder.derived[Blob]
     given Encoder[Blob] = Encoder.derived[Blob]

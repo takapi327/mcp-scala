@@ -230,11 +230,11 @@ package object schema:
     case USER, ASSISTANT
   object Role:
     given Decoder[Role] = Decoder[String].map {
-      case "user" => Role.USER
+      case "user"      => Role.USER
       case "assistant" => Role.ASSISTANT
     }
     given Encoder[Role] = Encoder[String].contramap {
-      case Role.USER => "user"
+      case Role.USER      => "user"
       case Role.ASSISTANT => "assistant"
     }
 
@@ -251,9 +251,9 @@ package object schema:
    *                 optional. It is a number between 0 and 1.
    */
   final case class Annotations(
-                                audience: List[Role],
-                                priority: Option[Double]
-                              )
+    audience: List[Role],
+    priority: Option[Double]
+  )
 
   object Annotations:
     given Decoder[Annotations] = Decoder.derived[Annotations]
@@ -267,10 +267,10 @@ package object schema:
    * @param arguments   A list of arguments to use for templating the prompt.
    */
   final case class Prompt(
-                           name: String,
-                           description: String,
-                           arguments: List[PromptArgument]
-                         )
+    name:        String,
+    description: String,
+    arguments:   List[PromptArgument]
+  )
 
   object Prompt:
     given Decoder[Prompt] = Decoder.derived[Prompt]
@@ -311,11 +311,11 @@ package object schema:
     given Encoder[ModelHint] = Encoder.derived[ModelHint]
 
   final case class ModelPreferences(
-                                     hints: List[ModelHint],
-                                     costPriority: Double,
-                                     speedPriority: Double,
-                                     intelligencePriority: Double
-                                   )
+    hints:                List[ModelHint],
+    costPriority:         Double,
+    speedPriority:        Double,
+    intelligencePriority: Double
+  )
 
   object ModelPreferences:
     given Decoder[ModelPreferences] = Decoder.derived[ModelPreferences]

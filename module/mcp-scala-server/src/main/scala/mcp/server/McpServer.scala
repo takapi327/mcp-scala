@@ -37,7 +37,8 @@ object McpServer:
 
   def apply[F[_]: Async: LiftIO](name: String, version: String): McpServer[F] = Impl[F](
     Implementation(name, version),
-    ServerCapabilities.build()
+    ServerCapabilities
+      .build()
       .withPromptsListChanged(false)
       .withToolsListChanged(false),
     List.empty,
@@ -119,7 +120,8 @@ object McpServer:
 
     def apply[F[_]: Async: LiftIO](name: String, version: String): FastMcp[F] =
       val serverInfo = Implementation(name, version)
-      val capabilities = ServerCapabilities.build()
+      val capabilities = ServerCapabilities
+        .build()
         .withPromptsListChanged(false)
         .withToolsListChanged(false)
       val handleProvider = new RequestHandler.Provider[F](
