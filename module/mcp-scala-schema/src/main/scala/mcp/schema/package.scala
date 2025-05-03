@@ -210,3 +210,18 @@ package object schema:
       case "emergency" => LoggingLevel.EMERGENCY
     }
     given Encoder[LoggingLevel] = Encoder[String].contramap(_.name)
+
+  /**
+   * Provides a standardized way for servers to request LLM
+   * sampling ("completions" or "generations") from language
+   * models via clients. This flow allows clients to maintain
+   * control over model access, selection, and permissions
+   * while enabling servers to leverage AI capabilities—with
+   * no server API keys necessary. Servers can request text or
+   * image-based interactions and optionally include context
+   * from MCP servers in their prompts.
+   */
+  case class Sampling()
+  object Sampling:
+    given Decoder[Sampling] = Decoder.derived[Sampling]
+    given Encoder[Sampling] = Encoder.derived[Sampling]
