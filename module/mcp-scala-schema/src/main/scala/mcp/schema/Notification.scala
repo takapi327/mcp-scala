@@ -14,30 +14,6 @@ import mcp.schema.notification.Notification
 object Notification:
 
   /**
-   * A notification from the server to the client, informing it that a resource has changed and may need to be read again. This should only be sent if the client previously sent a resources/subscribe request.
-   */
-  final case class ResourceUpdatedNotification(uri: String) extends Notification:
-    override def method: Method = Method.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED
-  object ResourceUpdatedNotification:
-    given Decoder[ResourceUpdatedNotification] = Decoder.instance { cursor =>
-      for {
-        method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED)
-        uri    <- cursor.get[String]("uri")
-      } yield
-        if method then ResourceUpdatedNotification(uri)
-        else throw new Exception("Invalid method for ResourceUpdatedNotification")
-    }
-
-    given Encoder[ResourceUpdatedNotification] = Encoder.instance { update =>
-      Json.obj(
-        "method" -> update.method.asJson,
-        "params" -> Json.obj(
-          "uri" -> update.uri.asJson
-        )
-      )
-    }
-
-  /**
    * An optional notification from the server to the client, informing it that the list of prompts it offers has changed. This may be issued by servers without any previous subscription from the client.
    */
   final case class PromptListChangedNotification() extends Notification:
