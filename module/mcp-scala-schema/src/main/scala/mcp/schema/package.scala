@@ -276,4 +276,30 @@ package object schema:
     given Decoder[Prompt] = Decoder.derived[Prompt]
     given Encoder[Prompt] = Encoder.derived[Prompt]
 
+  enum ContextInclusionStrategy:
+    case NONE, THIS_SERVER, ALL_SERVERS
+  object ContextInclusionStrategy:
+    given Decoder[ContextInclusionStrategy] = Decoder[String].map {
+      case "none"       => ContextInclusionStrategy.NONE
+      case "thisServer" => ContextInclusionStrategy.THIS_SERVER
+      case "allServers" => ContextInclusionStrategy.ALL_SERVERS
+    }
+    given Encoder[ContextInclusionStrategy] = Encoder[String].contramap {
+      case ContextInclusionStrategy.NONE        => "none"
+      case ContextInclusionStrategy.THIS_SERVER => "thisServer"
+      case ContextInclusionStrategy.ALL_SERVERS => "allServers"
+    }
 
+  enum StopReason:
+    case END_TURN, STOP_SEQUENCE, MAX_TOKENS
+  object StopReason:
+    given Decoder[StopReason] = Decoder[String].map {
+      case "endTurn"      => StopReason.END_TURN
+      case "stopSequence" => StopReason.STOP_SEQUENCE
+      case "maxTokens"    => StopReason.MAX_TOKENS
+    }
+    given Encoder[StopReason] = Encoder[String].contramap {
+      case StopReason.END_TURN      => "endTurn"
+      case StopReason.STOP_SEQUENCE => "stopSequence"
+      case StopReason.MAX_TOKENS    => "maxTokens"
+    }

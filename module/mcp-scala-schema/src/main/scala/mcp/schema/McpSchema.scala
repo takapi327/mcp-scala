@@ -59,22 +59,6 @@ object McpSchema:
 
 
 
-
-  /**
-   * The server's response to a prompts/list request from the client.
-   *
-   * @param prompts    A list of prompts that the server provides.
-   * @param nextCursor An optional cursor for pagination. If present, indicates there
-   *                   are more prompts available.
-   */
-  final case class ListPromptsResult(
-    prompts:    List[Prompt],
-    nextCursor: Option[String]
-  )
-  object ListPromptsResult:
-    given Decoder[ListPromptsResult] = Decoder.derived[ListPromptsResult]
-    given Encoder[ListPromptsResult] = Encoder.derived[ListPromptsResult].mapJson(_.dropNullValues)
-
   trait ToolSchema:
     def name: String
 
@@ -144,33 +128,6 @@ object McpSchema:
     given Decoder[SamplingMessage] = Decoder.derived[SamplingMessage]
     given Encoder[SamplingMessage] = Encoder.derived[SamplingMessage]
 
-  enum ContextInclusionStrategy:
-    case NONE, THIS_SERVER, ALL_SERVERS
-  object ContextInclusionStrategy:
-    given Decoder[ContextInclusionStrategy] = Decoder[String].map {
-      case "none"       => ContextInclusionStrategy.NONE
-      case "thisServer" => ContextInclusionStrategy.THIS_SERVER
-      case "allServers" => ContextInclusionStrategy.ALL_SERVERS
-    }
-    given Encoder[ContextInclusionStrategy] = Encoder[String].contramap {
-      case ContextInclusionStrategy.NONE        => "none"
-      case ContextInclusionStrategy.THIS_SERVER => "thisServer"
-      case ContextInclusionStrategy.ALL_SERVERS => "allServers"
-    }
-
-  enum StopReason:
-    case END_TURN, STOP_SEQUENCE, MAX_TOKENS
-  object StopReason:
-    given Decoder[StopReason] = Decoder[String].map {
-      case "endTurn"      => StopReason.END_TURN
-      case "stopSequence" => StopReason.STOP_SEQUENCE
-      case "maxTokens"    => StopReason.MAX_TOKENS
-    }
-    given Encoder[StopReason] = Encoder[String].contramap {
-      case StopReason.END_TURN      => "endTurn"
-      case StopReason.STOP_SEQUENCE => "stopSequence"
-      case StopReason.MAX_TOKENS    => "maxTokens"
-    }
 
   sealed trait PromptOrResourceReference:
 
