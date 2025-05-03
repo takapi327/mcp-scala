@@ -18,22 +18,6 @@ import mcp.schema.result.*
  * @see https://github.com/modelcontextprotocol/java-sdk/blob/79ec5b5ed1cc1a7abf2edda313a81875bd75ad86/mcp/src/main/java/io/modelcontextprotocol/spec/McpSchema.java
  */
 object McpSchema:
-
-
-
-
-
-
-  // ---------------------------
-  // Resource Interfaces
-  // ---------------------------
-  /**
-   * Base for objects that include optional annotations for the client. The client can
-   * use annotations to inform how objects are used or displayed
-   */
-  sealed trait Annotated:
-    def annotations: Annotations
-
   trait ResourceHandler[F[_]]:
 
     def resource: McpResource

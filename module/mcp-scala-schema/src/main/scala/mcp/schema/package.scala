@@ -320,3 +320,10 @@ package object schema:
   object ModelPreferences:
     given Decoder[ModelPreferences] = Decoder.derived[ModelPreferences]
     given Encoder[ModelPreferences] = Encoder.derived[ModelPreferences]
+
+  /**
+   * Base for objects that include optional annotations for the client. The client can
+   * use annotations to inform how objects are used or displayed
+   */
+  sealed trait Annotated:
+    def annotations: Annotations
