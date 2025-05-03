@@ -13,23 +13,6 @@ import mcp.schema.notification.Notification
 
 object Notification:
 
-  final case class ToolListChangedNotification() extends Notification:
-    override def method: Method = Method.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED
-  object ToolListChangedNotification:
-    given Decoder[ToolListChangedNotification] = Decoder.instance { cursor =>
-      for {
-        method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED)
-      } yield
-        if method then ToolListChangedNotification()
-        else throw new Exception("Invalid method for ToolListChangedNotification")
-    }
-
-    given Encoder[ToolListChangedNotification] = Encoder.instance { list =>
-      Json.obj(
-        "method" -> list.method.asJson
-      )
-    }
-
   /**
    * Notification of a log message passed from server to client. If no logging/setLevel request has been sent from the client, the server MAY decide which messages to send automatically.
    */
