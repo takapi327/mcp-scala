@@ -14,40 +14,6 @@ import mcp.schema.notification.Notification
 object Notification:
 
   /**
-   * An out-of-band notification used to inform the receiver of a progress update for a long-running request.
-   */
-  final case class ProgressNotification(
-    progressToken: ProgressToken,
-    progress:      Int,
-    total:         Option[Int],
-    message:       Option[String]
-  ) extends Notification:
-    override def method: Method = Method.METHOD_NOTIFICATION_PROGRESS
-  object ProgressNotification:
-    given Decoder[ProgressNotification] = Decoder.instance { cursor =>
-      for {
-        method        <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_PROGRESS)
-        progressToken <- cursor.get[ProgressToken]("progressToken")
-        progress      <- cursor.get[Int]("progress")
-        total         <- cursor.get[Option[Int]]("total")
-        message       <- cursor.get[Option[String]]("message")
-      } yield
-        if method then ProgressNotification(progressToken, progress, total, message)
-        else throw new Exception("Invalid method for ProgressNotification")
-    }
-    given Encoder[ProgressNotification] = Encoder.instance { progress =>
-      Json.obj(
-        "method" -> progress.method.asJson,
-        "params" -> Json.obj(
-          "progressToken" -> progress.progressToken.asJson,
-          "progress"      -> progress.progress.asJson,
-          "total"         -> progress.total.asJson,
-          "message"       -> progress.message.asJson
-        )
-      )
-    }
-
-  /**
    * An optional notification from the server to the client, informing it that the list of resources it can read from has changed. This may be issued by servers without any previous subscription from the client.
    */
   final case class ResourceListChangedNotification() extends Notification:
