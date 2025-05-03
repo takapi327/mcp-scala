@@ -9,31 +9,9 @@ package mcp.schema
 import io.circe.*
 import io.circe.syntax.*
 
-trait Notification:
-
-  def method: Method
+import mcp.schema.notification.Notification
 
 object Notification:
-
-  /**
-   * This notification is sent from the client to the server after initialization has finished.
-   */
-  final case class InitializedNotification() extends Notification:
-    override def method: Method = Method.METHOD_NOTIFICATION_INITIALIZED
-  object InitializedNotification:
-    given Decoder[InitializedNotification] = Decoder.instance { cursor =>
-      for {
-        method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_INITIALIZED)
-      } yield
-        if method then InitializedNotification()
-        else throw new Exception("Invalid method for InitializedNotification")
-    }
-
-    given Encoder[InitializedNotification] = Encoder.instance { init =>
-      Json.obj(
-        "method" -> init.method.asJson
-      )
-    }
 
   /**
    * An out-of-band notification used to inform the receiver of a progress update for a long-running request.
