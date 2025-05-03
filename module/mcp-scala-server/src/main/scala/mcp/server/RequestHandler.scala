@@ -13,7 +13,10 @@ import cats.effect.Async
 import io.circe.*
 import io.circe.syntax.*
 
-import mcp.schema.{ McpError, McpSchema }
+import mcp.schema.*
+import mcp.schema.handler.*
+import mcp.schema.request.*
+import mcp.schema.result.*
 
 import mcp.server.handler.*
 
@@ -24,31 +27,31 @@ trait RequestHandler[F[_]]:
 object RequestHandler:
 
   class Provider[F[_]: Async](
-    serverInfo:   McpSchema.Implementation,
-    capabilities: McpSchema.ServerCapabilities,
-    tools:        List[McpSchema.Tool[F, ?]],
-    resources:    List[McpSchema.ResourceHandler[F]],
-    prompts:      List[McpSchema.PromptHandler[F]]
+    serverInfo:   Implementation,
+    capabilities: ServerCapabilities,
+    tools:        List[Tool[F, ?]],
+    resources:    List[ResourceHandler[F]],
+    prompts:      List[PromptHandler[F]]
   ):
 
-    def handlers: Map[McpSchema.Method, RequestHandler[F]] =
+    def handlers: Map[Method, RequestHandler[F]] =
       Map(
         // Lifecycle Methods
-        McpSchema.METHOD_INITIALIZE               -> Initialize[F](serverInfo, capabilities),
-        McpSchema.METHOD_NOTIFICATION_INITIALIZED -> NotificationInitialized[F](),
-        McpSchema.METHOD_PING                     -> Ping[F](),
+        Method.METHOD_INITIALIZE               -> Initialize[F](serverInfo, capabilities),
+        Method.METHOD_NOTIFICATION_INITIALIZED -> NotificationInitialized[F](),
+        Method.METHOD_PING                     -> Ping[F](),
         // Tool Methods
-        McpSchema.METHOD_TOOLS_LIST -> ListTools[F](serverInfo, capabilities, tools),
-        McpSchema.METHOD_TOOLS_CALL -> CallTools[F](serverInfo, capabilities, tools),
+        Method.METHOD_TOOLS_LIST -> ListTools[F](serverInfo, capabilities, tools),
+        Method.METHOD_TOOLS_CALL -> CallTools[F](serverInfo, capabilities, tools),
         // Resources Methods
-        McpSchema.METHOD_RESOURCES_LIST           -> ResourcesList[F](resources),
-        McpSchema.METHOD_RESOURCES_READ           -> ResourcesRead[F](resources),
-        McpSchema.METHOD_RESOURCES_TEMPLATES_LIST -> ResourceTemplatesList[F](resources),
+        Method.METHOD_RESOURCES_LIST           -> ResourcesList[F](resources),
+        Method.METHOD_RESOURCES_READ           -> ResourcesRead[F](resources),
+        Method.METHOD_RESOURCES_TEMPLATES_LIST -> ResourceTemplatesList[F](resources),
         // Prompt Methods
-        McpSchema.METHOD_PROMPT_LIST -> PromptList[F](prompts),
-        McpSchema.METHOD_PROMPT_GET  -> PromptGet[F](prompts),
+        Method.METHOD_PROMPT_LIST -> PromptList[F](prompts),
+        Method.METHOD_PROMPT_GET  -> PromptGet[F](prompts),
         // Logging Methods
-        McpSchema.METHOD_LOGGING_SET_LEVEL -> Ping[F]()
+        Method.METHOD_LOGGING_SET_LEVEL -> Ping[F]()
         // McpSchema.METHOD_NOTIFICATION_MESSAGE -> ???,
         // Roots Methods
         // McpSchema.METHOD_ROOTS_LIST -> ???,
@@ -58,15 +61,15 @@ object RequestHandler:
       )
 
   final case class Initialize[F[_]: Async](
-    serverInfo:   McpSchema.Implementation,
-    capabilities: McpSchema.ServerCapabilities
+    serverInfo:   Implementation,
+    capabilities: ServerCapabilities
   ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
-      request.as[McpSchema.InitializeRequest] match
+      request.as[InitializeRequest] match
         case Left(error) => Async[F].pure(Left(error))
         case Right(initializeRequest) =>
-          val response = McpSchema.InitializeResult(
+          val response = InitializeResult(
             initializeRequest.protocolVersion,
             capabilities,
             serverInfo,
@@ -90,13 +93,13 @@ object RequestHandler:
    * @tparam F
    */
   final case class ListTools[F[_]: Async](
-    serverInfo:   McpSchema.Implementation,
-    capabilities: McpSchema.ServerCapabilities,
-    tools:        List[McpSchema.Tool[F, ?]]
+    serverInfo:   Implementation,
+    capabilities: ServerCapabilities,
+    tools:        List[Tool[F, ?]]
   ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
-      val response = McpSchema.ListToolsResult(tools, None)
+      val response = ListToolsResult(tools, None)
       Async[F].pure(Right(response.asJson))
 
   /**
@@ -109,18 +112,23 @@ object RequestHandler:
    * @tparam F
    */
   final case class CallTools[F[_]: Async](
-    serverInfo:   McpSchema.Implementation,
-    capabilities: McpSchema.ServerCapabilities,
-    tools:        List[McpSchema.Tool[F, ?]]
+    serverInfo:   Implementation,
+    capabilities: ServerCapabilities,
+    tools:        List[Tool[F, ?]]
   ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
-      request.as[McpSchema.CallToolRequest] match
+      request.as[CallToolRequest] match
         case Left(error) => Async[F].pure(Left(error))
         case Right(callToolRequest) =>
           tools.find(_.name == callToolRequest.name) match
             case None => Async[F].pure(Left(McpError(s"Tool not found: ${ callToolRequest.name }")))
             case Some(tool) =>
-              tool.decode(callToolRequest.arguments) match
-                case Left(error)  => Async[F].pure(Left(error))
-                case Right(value) => tool.execute(value).map(v => Right(v.asJson))
+              callToolRequest.arguments match {
+                case Some(arguments) =>
+                  tool.decode(arguments) match
+                    case Left(error)  => Async[F].pure(Left(error))
+                    case Right(value) => tool.execute(value).map(v => Right(v.asJson))
+                case None =>
+                  Async[F].pure(Left(McpError("No arguments provided")))
+              }

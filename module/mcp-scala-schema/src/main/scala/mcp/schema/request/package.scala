@@ -4,12 +4,14 @@
  * For more information see LICENSE or https://opensource.org/licenses/MIT
  */
 
-package mcp.server
+package mcp.schema
 
-import mcp.schema.Method
+package object request:
 
-trait McpTransport[F[_]]:
+  trait Request:
 
-  def requestHandlers: Map[Method, RequestHandler[F]]
+    def method: Method
 
-  def handleRequest(): F[Unit]
+  trait PaginatedRequest extends Request:
+
+    def cursor: Option[Cursor]

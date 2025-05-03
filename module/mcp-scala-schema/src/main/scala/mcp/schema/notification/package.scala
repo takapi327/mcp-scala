@@ -4,12 +4,10 @@
  * For more information see LICENSE or https://opensource.org/licenses/MIT
  */
 
-package mcp.server
+package mcp.schema
 
-import mcp.schema.Method
+package object notification:
 
-trait McpTransport[F[_]]:
+  trait Notification:
 
-  def requestHandlers: Map[Method, RequestHandler[F]]
-
-  def handleRequest(): F[Unit]
+    def method: Method
