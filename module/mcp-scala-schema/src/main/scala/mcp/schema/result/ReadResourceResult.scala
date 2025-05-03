@@ -9,8 +9,6 @@ package result
 
 import io.circe.*
 
-import mcp.schema.McpSchema.ResourceContents
-
 /**
  * The server's response to a resources/read request from the client.
  */

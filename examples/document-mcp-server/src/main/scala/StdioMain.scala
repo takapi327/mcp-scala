@@ -33,7 +33,7 @@ object StdioMain extends IOApp.Simple:
           .toList
           .map { contents =>
             ReadResourceResult(
-              contents.map(content => McpSchema.TextResourceContents(request.uri, "text/markdown", content))
+              contents.map(content => ResourceContents.Text(request.uri, "text/markdown", content))
             )
           }
 
@@ -55,7 +55,7 @@ object StdioMain extends IOApp.Simple:
           .toList
           .map { contents =>
             ReadResourceResult(
-              contents.map(content => McpSchema.TextResourceContents(request.uri, "text/markdown", content))
+              contents.map(content => ResourceContents.Text(request.uri, "text/markdown", content))
             )
           }
 

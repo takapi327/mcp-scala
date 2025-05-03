@@ -43,70 +43,7 @@ object McpSchema:
 
     def readHandler: ReadResourceRequest => F[ReadResourceResult]
 
-  sealed trait ResourceContents:
 
-    /**
-     * The URI of this resource.
-     *
-     * @return the URI of this resource.
-     */
-    def uri: String
-
-    /**
-     * The MIME type of this resource.
-     *
-     * @return the MIME type of this resource.
-     */
-    def mimeType: String
-
-  object ResourceContents:
-    given Decoder[ResourceContents] = Decoder.instance { c =>
-      c.get[String]("type").flatMap {
-        case "text" => c.as[TextResourceContents]
-        case "blob" => c.as[BlobResourceContents]
-        case _      => Left(DecodingFailure("Unknown resource type", c.history))
-      }
-    }
-
-    given Encoder[ResourceContents] = Encoder.instance {
-      case text: TextResourceContents => text.asJson
-      case blob: BlobResourceContents => blob.asJson
-    }
-
-  /**
-   * Text contents of a resource.
-   *
-   * @param uri      the URI of this resource.
-   * @param mimeType the MIME type of this resource.
-   * @param text     the text of the resource. This must only be set if the resource can
-   *                 actually be represented as text (not binary data).
-   */
-  final case class TextResourceContents(
-    uri:      String,
-    mimeType: String,
-    text:     String
-  ) extends ResourceContents
-  object TextResourceContents:
-    given Decoder[TextResourceContents] = Decoder.derived[TextResourceContents]
-    given Encoder[TextResourceContents] = Encoder.derived[TextResourceContents]
-
-  /**
-   * Binary contents of a resource.
-   *
-   * @param uri      the URI of this resource.
-   * @param mimeType the MIME type of this resource.
-   * @param blob     a base64-encoded string representing the binary data of the resource.
-   *                 This must only be set if the resource can actually be represented as binary data
-   *                 (not text).
-   */
-  final case class BlobResourceContents(
-    uri:      String,
-    mimeType: String,
-    blob:     String
-  ) extends ResourceContents
-  object BlobResourceContents:
-    given Decoder[BlobResourceContents] = Decoder.derived[BlobResourceContents]
-    given Encoder[BlobResourceContents] = Encoder.derived[BlobResourceContents]
 
   /**
    * Sent from the client to request resources/updated notifications from the server
