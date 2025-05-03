@@ -111,8 +111,8 @@ object McpServer:
         case "stdio" =>
           StdioMcpTransport(
             handleProvider.handlers,
-            Some("/Users/takapi327/Development/oss/scala/mcp-scala/input.log"),
-            Some("/Users/takapi327/Development/oss/scala/mcp-scala/output.log")
+            None,
+            None
           ).handleRequest()
         case "sse" => Async[F].raiseError(new McpError("SSE transport is not implemented yet"))
 
