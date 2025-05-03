@@ -23,17 +23,6 @@ import mcp.schema.result.*
 object McpSchema:
 
 
-  final case class ServerCapabilities(
-    // experimental: Option[Map[String, Json]],
-    // logging: LoggingCapabilities,
-    prompt:    PromptCapabilities,
-    resources: ResourceCapabilities,
-    tools:     ToolCapabilities
-  )
-  object ServerCapabilities:
-    given Decoder[ServerCapabilities] = Decoder.derived[ServerCapabilities]
-    given Encoder[ServerCapabilities] = Encoder.derived[ServerCapabilities]
-
   final case class Implementation(
     name:    String,
     version: String
