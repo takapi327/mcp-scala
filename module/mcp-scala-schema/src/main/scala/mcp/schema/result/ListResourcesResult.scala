@@ -9,9 +9,7 @@ package result
 
 import io.circe.*
 
-import mcp.schema.McpSchema.Resource
-
-final case class ListResourcesResult(resources: List[Resource], nextCursor: Option[Cursor]) extends PaginatedResult
+final case class ListResourcesResult(resources: List[McpResource], nextCursor: Option[Cursor]) extends PaginatedResult
 
 object ListResourcesResult:
   given Decoder[ListResourcesResult] = Decoder.derived[ListResourcesResult]

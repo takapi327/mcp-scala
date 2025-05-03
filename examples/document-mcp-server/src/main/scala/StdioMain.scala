@@ -17,7 +17,7 @@ import mcp.server.McpServer
 object StdioMain extends IOApp.Simple:
 
   private val resourceHandler = new McpSchema.ResourceHandler[IO]:
-    override def resource: McpSchema.StaticResource = McpSchema.Resource(
+    override def resource: McpResource.Static = McpResource.static(
       "/Users/takapi327/Development/oss/typelevel/affiliate/ldbc/README.md",
       "ldbc documentation",
       None,
@@ -38,7 +38,7 @@ object StdioMain extends IOApp.Simple:
           }
 
   private val resourceTemplateHandler = new McpSchema.ResourceHandler[IO]:
-    override def resource: McpSchema.ResourceTemplate = McpSchema.ResourceTemplate(
+    override def resource: McpResource.Template = McpResource.template(
       "/Users/takapi327/Development/oss/typelevel/affiliate/ldbc/{path}",
       "ldbc Project Files",
       Some("Access files in the ldbc project directory"),

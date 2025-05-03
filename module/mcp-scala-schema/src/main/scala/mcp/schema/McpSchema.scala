@@ -37,107 +37,14 @@ object McpSchema:
   sealed trait Annotated:
     def annotations: Annotations
 
-  trait Resource:
-    def name:        String
-    def description: Option[String]
-    def mimeType:    Option[String]
-
-    private[mcp] def isStatic: Boolean
-
-  object Resource:
-
-    given Decoder[Resource] = Decoder.instance { cursor =>
-      cursor.get[Option[String]]("uri").flatMap {
-        case Some(uri) =>
-          cursor.as[StaticResource]
-        case None =>
-          cursor.get[Option[String]]("uriTemplate").flatMap {
-            case Some(uriTemplate) =>
-              cursor.as[ResourceTemplate]
-            case None =>
-              Left(DecodingFailure("Invalid resource", cursor.history))
-          }
-      }
-    }
-
-    given Encoder[Resource] = Encoder.instance {
-      case static: StaticResource     => static.asJson
-      case template: ResourceTemplate => template.asJson
-    }
-
-    def apply(
-      uri:         String,
-      name:        String,
-      description: Option[String],
-      mimeType:    Option[String],
-      annotations: Annotations
-    ): StaticResource = StaticResource(uri, name, description, mimeType, annotations)
-
-  /**
-   * A known resource that the server is capable of reading.
-   *
-   * @param uri         the URI of the resource.
-   * @param name        A human-readable name for this resource. This can be used by clients to
-   *                    populate UI elements.
-   * @param description A description of what this resource represents. This can be used
-   *                    by clients to improve the LLM's understanding of available resources. It can be
-   *                    thought of like a "hint" to the model.
-   * @param mimeType    The MIME type of this resource, if known.
-   * @param annotations Optional annotations for the client. The client can use
-   *                    annotations to inform how objects are used or displayed.
-   */
-  final case class StaticResource(
-    uri:         String,
-    name:        String,
-    description: Option[String],
-    mimeType:    Option[String],
-    annotations: Annotations
-  ) extends Resource:
-
-    override private[mcp] def isStatic: Boolean = true
-
-  object StaticResource:
-    given Decoder[StaticResource] = Decoder.derived[StaticResource]
-    given Encoder[StaticResource] = Encoder.derived[StaticResource].mapJson(_.dropNullValues)
-
   trait ResourceHandler[F[_]]:
 
-    def resource: Resource
+    def resource: McpResource
 
     def readHandler: ReadResourceRequest => F[ReadResourceResult]
 
-  /**
-   * Resource templates allow servers to expose parameterized resources using URI
-   * templates.
-   *
-   * @param uriTemplate A URI template that can be used to generate URIs for this
-   *                    resource.
-   * @param name        A human-readable name for this resource. This can be used by clients to
-   *                    populate UI elements.
-   * @param description A description of what this resource represents. This can be used
-   *                    by clients to improve the LLM's understanding of available resources. It can be
-   *                    thought of like a "hint" to the model.
-   * @param mimeType    The MIME type of this resource, if known.
-   * @param annotations Optional annotations for the client. The client can use
-   *                    annotations to inform how objects are used or displayed.
-   * @see <a href="https://datatracker.ietf.org/doc/html/rfc6570">RFC 6570</a>
-   */
-  final case class ResourceTemplate(
-    uriTemplate: String,
-    name:        String,
-    description: Option[String],
-    mimeType:    Option[String],
-    annotations: Annotations
-  ) extends Resource:
-
-    override private[mcp] def isStatic: Boolean = false
-
-  object ResourceTemplate:
-    given Decoder[ResourceTemplate] = Decoder.derived[ResourceTemplate]
-    given Encoder[ResourceTemplate] = Encoder.derived[ResourceTemplate].mapJson(_.dropNullValues)
-
   final case class ListResourcesResult(
-    resources:  List[Resource],
+    resources:  List[McpResource],
     nextCursor: Option[String]
   )
   object ListResourcesResult:
@@ -145,7 +52,7 @@ object McpSchema:
     given Encoder[ListResourcesResult] = Encoder.derived[ListResourcesResult].mapJson(_.dropNullValues)
 
   final case class ListResourceTemplatesResult(
-    resourceTemplates: List[Resource],
+    resourceTemplates: List[McpResource],
     nextCursor:        Option[String]
   )
   object ListResourceTemplatesResult:

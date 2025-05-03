@@ -9,9 +9,7 @@ package result
 
 import io.circe.*
 
-import mcp.schema.McpSchema.Resource
-
-final case class ListResourceTemplatesResult(resourceTemplates: List[Resource], nextCursor: Option[Cursor])
+final case class ListResourceTemplatesResult(resourceTemplates: List[McpResource], nextCursor: Option[Cursor])
   extends PaginatedResult
 
 object ListResourceTemplatesResult:
