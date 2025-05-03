@@ -22,7 +22,7 @@ object StdioMain extends IOApp.Simple:
       "ldbc documentation",
       None,
       None,
-      McpSchema.Annotations(List.empty, None)
+      Annotations(List.empty, None)
     )
     override def readHandler: ReadResourceRequest => IO[ReadResourceResult] =
       request =>
@@ -43,7 +43,7 @@ object StdioMain extends IOApp.Simple:
       "ldbc Project Files",
       Some("Access files in the ldbc project directory"),
       None,
-      McpSchema.Annotations(List.empty, None)
+      Annotations(List.empty, None)
     )
 
     override def readHandler: ReadResourceRequest => IO[ReadResourceResult] =

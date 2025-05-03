@@ -26,25 +26,6 @@ object McpSchema:
 
 
 
-  /**
-   * Optional annotations for the client. The client can use annotations to inform how
-   * objects are used or displayed.
-   *
-   * @param audience Describes who the intended customer of this object or data is. It
-   *                 can include multiple entries to indicate content useful for multiple audiences
-   *                 (e.g., `["user", "assistant"]`).
-   * @param priority Describes how important this data is for operating the server. A
-   *                 value of 1 means "most important," and indicates that the data is effectively
-   *                 required, while 0 means "least important," and indicates that the data is entirely
-   *                 optional. It is a number between 0 and 1.
-   */
-  final case class Annotations(
-    audience: List[Role],
-    priority: Option[Double]
-  )
-  object Annotations:
-    given Decoder[Annotations] = Decoder.derived[Annotations]
-    given Encoder[Annotations] = Encoder.derived[Annotations].mapJson(_.dropNullValues)
 
   // ---------------------------
   // Resource Interfaces
