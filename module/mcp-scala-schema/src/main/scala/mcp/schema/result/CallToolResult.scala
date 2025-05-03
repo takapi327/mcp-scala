@@ -9,8 +9,6 @@ package result
 
 import io.circe.*
 
-import mcp.schema.McpSchema.Content
-
 /**
  * The server's response to a tool call.
  *

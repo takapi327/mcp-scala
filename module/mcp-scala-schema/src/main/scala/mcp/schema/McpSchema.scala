@@ -56,70 +56,8 @@ object McpSchema:
   // ---------------------------
   // Content Types
   // ---------------------------
-  sealed trait Content:
 
-    def `type`: String
 
-  object Content:
-    given Decoder[Content] = Decoder.instance { c =>
-      c.get[String]("type").flatMap {
-        case "text"     => c.as[TextContent]
-        case "image"    => c.as[ImageContent]
-        case "resource" => c.as[EmbeddedResource]
-        case _          => Left(DecodingFailure("Unknown content type", c.history))
-      }
-    }
-
-    given Encoder[Content] = Encoder.instance {
-      case text: TextContent          => text.asJson
-      case image: ImageContent        => image.asJson
-      case resource: EmbeddedResource => resource.asJson
-    }
-
-    def text(text: String): TextContent = TextContent(None, None, text)
-
-  final case class TextContent(
-    audience: Option[List[Role]],
-    priority: Option[Double],
-    text:     String
-  ) extends Content:
-    override def `type`: String = "text"
-
-  object TextContent:
-    given Decoder[TextContent] = Decoder.derived[TextContent]
-    given Encoder[TextContent] = Encoder.instance { txt =>
-      Json
-        .obj(
-          "type"     -> Json.fromString(txt.`type`),
-          "audience" -> txt.audience.asJson,
-          "priority" -> txt.priority.asJson,
-          "text"     -> Json.fromString(txt.text)
-        )
-        .dropNullValues
-    }
-
-  final case class ImageContent(
-    audience: List[Role],
-    priority: Double,
-    data:     String,
-    mimeType: String
-  ) extends Content:
-    override def `type`: String = "image"
-
-  object ImageContent:
-    given Decoder[ImageContent] = Decoder.derived[ImageContent]
-    given Encoder[ImageContent] = Encoder.derived[ImageContent]
-
-  final case class EmbeddedResource(
-    audience: List[Role],
-    priority: Double,
-    resource: ResourceContents
-  ) extends Content:
-    override def `type`: String = "resource"
-
-  object EmbeddedResource:
-    given Decoder[EmbeddedResource] = Decoder.derived[EmbeddedResource]
-    given Encoder[EmbeddedResource] = Encoder.derived[EmbeddedResource]
 
   /**
    * Describes a message returned as part of a prompt.
