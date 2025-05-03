@@ -82,7 +82,7 @@ object StdioMain extends IOApp.Simple:
           val result = GetPromptResult(
             Some("Code review prompt"),
             List(
-              McpSchema.PromptMessage(
+              PromptMessage(
                 Role.USER,
                 content
               )

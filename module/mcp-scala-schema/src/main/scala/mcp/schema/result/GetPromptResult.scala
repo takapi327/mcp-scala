@@ -9,8 +9,6 @@ package result
 
 import io.circe.*
 
-import mcp.schema.McpSchema.PromptMessage
-
 /**
  * The server's response to a prompts/get request from the client.
  */

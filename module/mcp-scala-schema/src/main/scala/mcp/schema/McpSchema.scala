@@ -59,22 +59,6 @@ object McpSchema:
 
 
 
-  /**
-   * Describes a message returned as part of a prompt.
-   *
-   * This is similar to `SamplingMessage`, but also supports the embedding of resources
-   * from the MCP server.
-   *
-   * @param role    The sender or recipient of messages and data in a conversation.
-   * @param content The content of the message of type [[Content]].
-   */
-  final case class PromptMessage(
-    role:    Role,
-    content: Content
-  )
-  object PromptMessage:
-    given Decoder[PromptMessage] = Decoder.derived[PromptMessage]
-    given Encoder[PromptMessage] = Encoder.derived[PromptMessage]
 
   /**
    * The server's response to a prompts/list request from the client.
