@@ -43,22 +43,6 @@ object McpSchema:
 
     def readHandler: ReadResourceRequest => F[ReadResourceResult]
 
-  final case class ListResourcesResult(
-    resources:  List[McpResource],
-    nextCursor: Option[String]
-  )
-  object ListResourcesResult:
-    given Decoder[ListResourcesResult] = Decoder.derived[ListResourcesResult]
-    given Encoder[ListResourcesResult] = Encoder.derived[ListResourcesResult].mapJson(_.dropNullValues)
-
-  final case class ListResourceTemplatesResult(
-    resourceTemplates: List[McpResource],
-    nextCursor:        Option[String]
-  )
-  object ListResourceTemplatesResult:
-    given Decoder[ListResourceTemplatesResult] = Decoder.derived[ListResourceTemplatesResult]
-    given Encoder[ListResourceTemplatesResult] = Encoder.derived[ListResourceTemplatesResult].mapJson(_.dropNullValues)
-
   sealed trait ResourceContents:
 
     /**
