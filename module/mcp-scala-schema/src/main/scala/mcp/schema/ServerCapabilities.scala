@@ -80,14 +80,14 @@ object ServerCapabilities:
         "completions"  -> capabilities.completions.asJson,
         "prompts" -> Json.obj(
           "listChanged" -> capabilities.promptsListChanged.asJson
-        ),
+        ).dropNullValues,
         "resources" -> Json.obj(
           "subscribe"   -> capabilities.resourcesSubscribe.asJson,
           "listChanged" -> capabilities.resourcesListChanged.asJson
-        ),
+        ).dropNullValues,
         "tools" -> Json.obj(
           "listChanged" -> capabilities.toolsListChanged.asJson
-        )
+        ).dropNullValues
       )
       .dropNullValues
   }
