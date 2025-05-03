@@ -23,14 +23,6 @@ import mcp.schema.result.*
 object McpSchema:
 
 
-  final case class ResourceCapabilities(
-    subscribe:   Option[Boolean],
-    listChanged: Option[Boolean]
-  )
-  object ResourceCapabilities:
-    given Decoder[ResourceCapabilities] = Decoder.derived[ResourceCapabilities]
-    given Encoder[ResourceCapabilities] = Encoder.derived[ResourceCapabilities].mapJson(_.dropNullValues)
-
   final case class ToolCapabilities(listChanged: Boolean)
   object ToolCapabilities:
     given Decoder[ToolCapabilities] = Decoder.derived[ToolCapabilities]

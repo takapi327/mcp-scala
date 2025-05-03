@@ -38,7 +38,7 @@ object McpServer:
     McpSchema.Implementation(name, version),
     McpSchema.ServerCapabilities(
       PromptCapabilities(false),
-      McpSchema.ResourceCapabilities(None, None),
+      ResourceCapabilities(None, None),
       McpSchema.ToolCapabilities(false)
     ),
     List.empty,
@@ -122,7 +122,7 @@ object McpServer:
       val serverInfo = McpSchema.Implementation(name, version)
       val capabilities = McpSchema.ServerCapabilities(
         PromptCapabilities(false),
-        McpSchema.ResourceCapabilities(None, None),
+        ResourceCapabilities(None, None),
         McpSchema.ToolCapabilities(false)
       )
       val handleProvider = new RequestHandler.Provider[F](
