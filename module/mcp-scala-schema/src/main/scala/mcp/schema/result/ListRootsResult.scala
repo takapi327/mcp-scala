@@ -9,8 +9,6 @@ package result
 
 import io.circe.*
 
-import mcp.schema.McpSchema.Root
-
 /**
  * The client's response to a roots/list request from the server.
  * This result contains an array of Root objects, each representing a root directory
