@@ -11,11 +11,13 @@ import io.circe.*
 
 /**
  * The client's response to a sampling/create_message request from the server. The client should inform the user before returning the sampled message, to allow them to inspect the response (human in the loop) and decide whether to allow the server to see it.
- * TODO: extends SamplingMessage
- *
- * @see https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/schema/2025-03-26/schema.ts#L902-L919
  */
-final case class CreateMessageResult(model: String, stopReason: Option[StopReason]) extends Result
+final case class CreateMessageResult(
+                                      model: String,
+                                      stopReason: Option[StopReason],
+                                      role:    Role,
+                                      content: Content
+                                    ) extends Result, SamplingMessage
 
 object CreateMessageResult:
   given Decoder[CreateMessageResult] = Decoder.derived[CreateMessageResult]

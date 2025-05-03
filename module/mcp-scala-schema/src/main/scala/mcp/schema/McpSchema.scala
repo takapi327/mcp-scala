@@ -119,18 +119,3 @@ object McpSchema:
   object ModelPreferences:
     given Decoder[ModelPreferences] = Decoder.derived[ModelPreferences]
     given Encoder[ModelPreferences] = Encoder.derived[ModelPreferences]
-
-  final case class SamplingMessage(
-    role:    Role,
-    content: Content
-  )
-  object SamplingMessage:
-    given Decoder[SamplingMessage] = Decoder.derived[SamplingMessage]
-    given Encoder[SamplingMessage] = Encoder.derived[SamplingMessage]
-
-
-
-
-  // ---------------------------
-  // Roots
-  // ---------------------------
