@@ -23,11 +23,6 @@ import mcp.schema.result.*
 object McpSchema:
 
 
-  final case class PromptCapabilities(listChanged: Boolean)
-  object PromptCapabilities:
-    given Decoder[PromptCapabilities] = Decoder.derived[PromptCapabilities]
-    given Encoder[PromptCapabilities] = Encoder.derived[PromptCapabilities]
-
   final case class ResourceCapabilities(
     subscribe:   Option[Boolean],
     listChanged: Option[Boolean]
