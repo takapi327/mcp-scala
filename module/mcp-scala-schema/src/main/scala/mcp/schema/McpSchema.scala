@@ -22,19 +22,6 @@ import mcp.schema.result.*
  */
 object McpSchema:
 
-  /**
-   * Roots define the boundaries of where servers can operate within the filesystem,
-   * allowing them to understand which directories and files they have access to.
-   * Servers can request the list of roots from supporting clients and
-   * receive notifications when that list changes.
-   *
-   * @param listChanged Whether the client would send notification about roots
-   *                    has changed since the last time the server checked.
-   */
-  final case class RootCapabilities(listChanged: Boolean)
-  object RootCapabilities:
-    given Decoder[RootCapabilities] = Decoder.derived[RootCapabilities]
-    given Encoder[RootCapabilities] = Encoder.derived[RootCapabilities]
 
   /**
    * Clients can implement additional features to enrich connected MCP servers with
