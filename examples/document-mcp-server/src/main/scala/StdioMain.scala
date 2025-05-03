@@ -83,7 +83,7 @@ object StdioMain extends IOApp.Simple:
             Some("Code review prompt"),
             List(
               McpSchema.PromptMessage(
-                McpSchema.Role.USER,
+                Role.USER,
                 content
               )
             )

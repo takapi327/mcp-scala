@@ -24,17 +24,7 @@ object McpSchema:
 
 
 
-  enum Role:
-    case USER, ASSISTANT
-  object Role:
-    given Decoder[Role] = Decoder[String].map {
-      case "user"      => Role.USER
-      case "assistant" => Role.ASSISTANT
-    }
-    given Encoder[Role] = Encoder[String].contramap {
-      case Role.USER      => "user"
-      case Role.ASSISTANT => "assistant"
-    }
+
 
   /**
    * Optional annotations for the client. The client can use annotations to inform how
