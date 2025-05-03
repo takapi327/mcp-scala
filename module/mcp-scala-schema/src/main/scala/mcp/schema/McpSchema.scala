@@ -6,9 +6,6 @@
 
 package mcp.schema
 
-import io.circe.*
-import io.circe.syntax.*
-
 import mcp.schema.request.*
 import mcp.schema.result.*
 
@@ -52,56 +49,3 @@ object McpSchema:
     prompt:  Prompt,
     handler: GetPromptRequest => F[GetPromptResult]
   )
-
-  // ---------------------------
-  // Content Types
-  // ---------------------------
-
-
-
-  trait ToolSchema:
-    def name: String
-
-    def description: String
-
-    def inputSchema: Json
-
-  object ToolSchema:
-    case class Static(
-      name:        String,
-      description: String,
-      inputSchema: Json
-    ) extends ToolSchema
-
-    given Encoder[ToolSchema] = Encoder.instance { tool =>
-      Json.obj(
-        "name"        -> Json.fromString(tool.name),
-        "description" -> Json.fromString(tool.description),
-        "inputSchema" -> tool.inputSchema
-      )
-    }
-
-  /**
-   * Represents a tool that the server provides. Tools enable servers to expose
-   * executable functionality to the system. Through these tools, you can interact with
-   * external systems, perform computations, and take actions in the real world.
-   *
-   * @param name        A unique identifier for the tool. This name is used when calling the
-   *                    tool.
-   * @param description A human-readable description of what the tool does. This can be
-   *                    used by clients to improve the LLM's understanding of available tools.
-   */
-  final case class Tool[F[_], T: JsonSchema: Decoder](
-    name:        String,
-    description: String,
-    execute:     T => F[CallToolResult]
-  ) extends ToolSchema:
-
-    override def inputSchema: Json = summon[JsonSchema[T]].asJson
-
-    def decode(arguments: Json): Decoder.Result[T] =
-      summon[Decoder[T]].decodeJson(arguments)
-
-  // ---------------------------
-  // Sampling Interfaces
-  // ---------------------------

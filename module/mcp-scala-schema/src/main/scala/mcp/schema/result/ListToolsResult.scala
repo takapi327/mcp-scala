@@ -9,8 +9,6 @@ package result
 
 import io.circe.*
 
-import mcp.schema.McpSchema.ToolSchema
-
 /**
  * The server's response to a tools/list request from the client.
  */

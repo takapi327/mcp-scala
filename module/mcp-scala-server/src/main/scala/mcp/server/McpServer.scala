@@ -16,7 +16,7 @@ trait McpServer[F[_]]:
 
   def capabilities: ServerCapabilities
 
-  def addTool[T](tool: McpSchema.Tool[F, T]): McpServer[F]
+  def addTool[T](tool: Tool[F, T]): McpServer[F]
 
   def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F]
 
@@ -48,13 +48,13 @@ object McpServer:
   private case class Impl[F[_]](
     serverInfo:   Implementation,
     capabilities: ServerCapabilities,
-    tools:        List[McpSchema.Tool[F, ?]],
+    tools:        List[Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
     prompts:      List[McpSchema.PromptHandler[F]],
     transport:    McpTransport[F]
   ) extends McpServer[F]:
 
-    override def addTool[T](tool: McpSchema.Tool[F, T]): McpServer[F] =
+    override def addTool[T](tool: Tool[F, T]): McpServer[F] =
       this.copy(tools = tools :+ tool)
 
     override def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F] =
@@ -75,7 +75,7 @@ object McpServer:
   case class FastMcp[F[_]: Async: LiftIO](
     serverInfo:   Implementation,
     capabilities: ServerCapabilities,
-    tools:        List[McpSchema.Tool[F, ?]],
+    tools:        List[Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
     prompts:      List[McpSchema.PromptHandler[F]],
     handlers:     Map[Method, RequestHandler[F]]
@@ -89,7 +89,7 @@ object McpServer:
       prompts
     )
 
-    def addTool[T](tool: McpSchema.Tool[F, T]): FastMcp[F] =
+    def addTool[T](tool: Tool[F, T]): FastMcp[F] =
       this.copy(tools = tools :+ tool)
 
     def addResource(resource: McpSchema.ResourceHandler[F]): FastMcp[F] =

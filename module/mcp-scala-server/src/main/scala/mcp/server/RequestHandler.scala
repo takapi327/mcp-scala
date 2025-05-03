@@ -28,7 +28,7 @@ object RequestHandler:
   class Provider[F[_]: Async](
     serverInfo:   Implementation,
     capabilities: ServerCapabilities,
-    tools:        List[McpSchema.Tool[F, ?]],
+    tools:        List[Tool[F, ?]],
     resources:    List[McpSchema.ResourceHandler[F]],
     prompts:      List[McpSchema.PromptHandler[F]]
   ):
@@ -94,7 +94,7 @@ object RequestHandler:
   final case class ListTools[F[_]: Async](
     serverInfo:   Implementation,
     capabilities: ServerCapabilities,
-    tools:        List[McpSchema.Tool[F, ?]]
+    tools:        List[Tool[F, ?]]
   ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =
@@ -113,7 +113,7 @@ object RequestHandler:
   final case class CallTools[F[_]: Async](
     serverInfo:   Implementation,
     capabilities: ServerCapabilities,
-    tools:        List[McpSchema.Tool[F, ?]]
+    tools:        List[Tool[F, ?]]
   ) extends RequestHandler[F]:
 
     override def handle(request: Json): F[Either[Throwable, Json]] =

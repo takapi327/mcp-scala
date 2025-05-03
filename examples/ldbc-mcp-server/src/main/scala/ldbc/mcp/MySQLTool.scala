@@ -24,7 +24,7 @@ object MySQLTool:
     .default[IO]("127.0.0.1", 13306, "ldbc", "password", "world")
     .setSSL(SSL.Trusted)
 
-  def tool: McpSchema.Tool[IO, MySQLTool] = McpSchema.Tool[IO, MySQLTool](
+  def tool: Tool[IO, MySQLTool] = Tool[IO, MySQLTool](
     "MySQL",
     "MySQL Connector",
     request =>
