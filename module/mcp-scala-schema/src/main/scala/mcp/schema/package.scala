@@ -259,3 +259,21 @@ package object schema:
     given Decoder[Annotations] = Decoder.derived[Annotations]
     given Encoder[Annotations] = Encoder.derived[Annotations].mapJson(_.dropNullValues)
 
+  /**
+   * A prompt or prompt template that the server offers.
+   *
+   * @param name        The name of the prompt or prompt template.
+   * @param description An optional description of what this prompt provides.
+   * @param arguments   A list of arguments to use for templating the prompt.
+   */
+  final case class Prompt(
+                           name: String,
+                           description: String,
+                           arguments: List[PromptArgument]
+                         )
+
+  object Prompt:
+    given Decoder[Prompt] = Decoder.derived[Prompt]
+    given Encoder[Prompt] = Encoder.derived[Prompt]
+
+

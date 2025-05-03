@@ -59,7 +59,7 @@ object StdioMain extends IOApp.Simple:
             )
           }
 
-  private val prompt = McpSchema.Prompt(
+  private val prompt = Prompt(
     "Code Review",
     "Please review the code and provide feedback.",
     List(

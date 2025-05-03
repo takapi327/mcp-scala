@@ -48,22 +48,6 @@ object McpSchema:
   // ---------------------------
   // Prompt Interfaces
   // ---------------------------
-  /**
-   * A prompt or prompt template that the server offers.
-   *
-   * @param name        The name of the prompt or prompt template.
-   * @param description An optional description of what this prompt provides.
-   * @param arguments   A list of arguments to use for templating the prompt.
-   */
-  final case class Prompt(
-    name:        String,
-    description: String,
-    arguments:   List[PromptArgument]
-  )
-  object Prompt:
-    given Decoder[Prompt] = Decoder.derived[Prompt]
-    given Encoder[Prompt] = Encoder.derived[Prompt]
-
   case class PromptHandler[F[_]](
     prompt:  Prompt,
     handler: GetPromptRequest => F[GetPromptResult]
