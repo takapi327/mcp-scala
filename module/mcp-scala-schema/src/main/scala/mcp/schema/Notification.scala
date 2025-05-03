@@ -13,23 +13,6 @@ import mcp.schema.notification.Notification
 
 object Notification:
 
-  final case class RootsListChangedNotification() extends Notification:
-    override def method: Method = Method.METHOD_NOTIFICATION_ROOTS_LIST_CHANGED
-  object RootsListChangedNotification:
-    given Decoder[RootsListChangedNotification] = Decoder.instance { cursor =>
-      for {
-        method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_ROOTS_LIST_CHANGED)
-      } yield
-        if method then RootsListChangedNotification()
-        else throw new Exception("Invalid method for RootsListChangedNotification")
-    }
-
-    given Encoder[RootsListChangedNotification] = Encoder.instance { list =>
-      Json.obj(
-        "method" -> list.method.asJson
-      )
-    }
-
   /**
    * This notification can be sent by either side to indicate that it is cancelling a previously-issued request.
    *
