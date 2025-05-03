@@ -13,26 +13,6 @@ import mcp.schema.notification.Notification
 
 object Notification:
 
-  /**
-   * An optional notification from the server to the client, informing it that the list of prompts it offers has changed. This may be issued by servers without any previous subscription from the client.
-   */
-  final case class PromptListChangedNotification() extends Notification:
-    override def method: Method = Method.METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED
-  object PromptListChangedNotification:
-    given Decoder[PromptListChangedNotification] = Decoder.instance { cursor =>
-      for {
-        method <- cursor.get[Method]("method").map(_ == Method.METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED)
-      } yield
-        if method then PromptListChangedNotification()
-        else throw new Exception("Invalid method for PromptListChangedNotification")
-    }
-
-    given Encoder[PromptListChangedNotification] = Encoder.instance { list =>
-      Json.obj(
-        "method" -> list.method.asJson
-      )
-    }
-
   final case class ToolListChangedNotification() extends Notification:
     override def method: Method = Method.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED
   object ToolListChangedNotification:
