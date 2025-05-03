@@ -130,13 +130,6 @@ object McpSchema:
 
 
 
-  final case class CompleteArgument(
-    name:  String,
-    value: String
-  )
-  object CompleteArgument:
-    given Decoder[CompleteArgument] = Decoder.derived[CompleteArgument]
-    given Encoder[CompleteArgument] = Encoder.derived[CompleteArgument]
 
   // ---------------------------
   // Roots

@@ -10,8 +10,6 @@ package request
 import io.circe.*
 import io.circe.syntax.*
 
-import mcp.schema.McpSchema.{ CompleteArgument }
-
 final case class CompleteRequest(ref: PromptOrResourceReference, argument: CompleteArgument) extends Request:
   override def method: Method = Method.METHOD_COMPLETION_COMPLETE
 
