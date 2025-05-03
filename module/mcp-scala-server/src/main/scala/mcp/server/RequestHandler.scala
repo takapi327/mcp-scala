@@ -31,7 +31,7 @@ object RequestHandler:
     capabilities: ServerCapabilities,
     tools:        List[Tool[F, ?]],
     resources:    List[ResourceHandler[F]],
-    prompts:      List[McpSchema.PromptHandler[F]]
+    prompts:      List[PromptHandler[F]]
   ):
 
     def handlers: Map[Method, RequestHandler[F]] =

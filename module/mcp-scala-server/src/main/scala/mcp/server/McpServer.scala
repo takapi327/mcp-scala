@@ -21,7 +21,7 @@ trait McpServer[F[_]]:
 
   def addResource(resource: ResourceHandler[F]): McpServer[F]
 
-  def addPrompt(prompt: McpSchema.PromptHandler[F]): McpServer[F]
+  def addPrompt(prompt: PromptHandler[F]): McpServer[F]
 
   def setCapabilities(capabilities: ServerCapabilities): McpServer[F]
 
@@ -51,7 +51,7 @@ object McpServer:
     capabilities: ServerCapabilities,
     tools:        List[Tool[F, ?]],
     resources:    List[ResourceHandler[F]],
-    prompts:      List[McpSchema.PromptHandler[F]],
+    prompts:      List[PromptHandler[F]],
     transport:    McpTransport[F]
   ) extends McpServer[F]:
 
@@ -61,7 +61,7 @@ object McpServer:
     override def addResource(resource: ResourceHandler[F]): McpServer[F] =
       this.copy(resources = resources :+ resource)
 
-    override def addPrompt(prompt: McpSchema.PromptHandler[F]): McpServer[F] =
+    override def addPrompt(prompt: PromptHandler[F]): McpServer[F] =
       this.copy(prompts = prompts :+ prompt)
 
     override def setCapabilities(capabilities: ServerCapabilities): McpServer[F] =
@@ -78,7 +78,7 @@ object McpServer:
     capabilities: ServerCapabilities,
     tools:        List[Tool[F, ?]],
     resources:    List[ResourceHandler[F]],
-    prompts:      List[McpSchema.PromptHandler[F]],
+    prompts:      List[PromptHandler[F]],
     handlers:     Map[Method, RequestHandler[F]]
   ):
 
@@ -96,7 +96,7 @@ object McpServer:
     def addResource(resource: ResourceHandler[F]): FastMcp[F] =
       this.copy(resources = resources :+ resource)
 
-    def addPrompt(prompt: McpSchema.PromptHandler[F]): FastMcp[F] =
+    def addPrompt(prompt: PromptHandler[F]): FastMcp[F] =
       this.copy(prompts = prompts :+ prompt)
 
     def setCapabilities(capabilities: ServerCapabilities): FastMcp[F] =

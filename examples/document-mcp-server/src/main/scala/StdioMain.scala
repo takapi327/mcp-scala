@@ -72,7 +72,7 @@ object StdioMain extends IOApp.Simple:
     )
   )
 
-  private val promptHandler = McpSchema.PromptHandler(
+  private val promptHandler = PromptHandler(
     prompt,
     request => {
       val codeOpt = request.arguments.flatMap(_.get("code")).flatMap(_.as[String].toOption)
