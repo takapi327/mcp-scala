@@ -16,6 +16,7 @@ import io.circe.syntax.*
 import mcp.schema.*
 import mcp.schema.request.*
 import mcp.schema.result.*
+import mcp.schema.handler.*
 
 import mcp.server.handler.*
 
@@ -29,7 +30,7 @@ object RequestHandler:
     serverInfo:   Implementation,
     capabilities: ServerCapabilities,
     tools:        List[Tool[F, ?]],
-    resources:    List[McpSchema.ResourceHandler[F]],
+    resources:    List[ResourceHandler[F]],
     prompts:      List[McpSchema.PromptHandler[F]]
   ):
 

@@ -18,12 +18,6 @@ import mcp.schema.result.*
  * @see https://github.com/modelcontextprotocol/java-sdk/blob/79ec5b5ed1cc1a7abf2edda313a81875bd75ad86/mcp/src/main/java/io/modelcontextprotocol/spec/McpSchema.java
  */
 object McpSchema:
-  trait ResourceHandler[F[_]]:
-
-    def resource: McpResource
-
-    def readHandler: ReadResourceRequest => F[ReadResourceResult]
-
 
 
   // ---------------------------

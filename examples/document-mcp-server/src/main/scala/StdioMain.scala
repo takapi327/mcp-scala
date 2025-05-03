@@ -11,12 +11,13 @@ import fs2.io.*
 import mcp.schema.*
 import mcp.schema.request.*
 import mcp.schema.result.*
+import mcp.schema.handler.*
 
 import mcp.server.McpServer
 
 object StdioMain extends IOApp.Simple:
 
-  private val resourceHandler = new McpSchema.ResourceHandler[IO]:
+  private val resourceHandler = new ResourceHandler[IO]:
     override def resource: McpResource.Static = McpResource.static(
       "/Users/takapi327/Development/oss/typelevel/affiliate/ldbc/README.md",
       "ldbc documentation",
@@ -37,7 +38,7 @@ object StdioMain extends IOApp.Simple:
             )
           }
 
-  private val resourceTemplateHandler = new McpSchema.ResourceHandler[IO]:
+  private val resourceTemplateHandler = new ResourceHandler[IO]:
     override def resource: McpResource.Template = McpResource.template(
       "/Users/takapi327/Development/oss/typelevel/affiliate/ldbc/{path}",
       "ldbc Project Files",

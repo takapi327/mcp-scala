@@ -9,6 +9,7 @@ package mcp.server
 import cats.effect.*
 
 import mcp.schema.*
+import mcp.schema.handler.*
 
 trait McpServer[F[_]]:
 
@@ -18,7 +19,7 @@ trait McpServer[F[_]]:
 
   def addTool[T](tool: Tool[F, T]): McpServer[F]
 
-  def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F]
+  def addResource(resource: ResourceHandler[F]): McpServer[F]
 
   def addPrompt(prompt: McpSchema.PromptHandler[F]): McpServer[F]
 
@@ -49,7 +50,7 @@ object McpServer:
     serverInfo:   Implementation,
     capabilities: ServerCapabilities,
     tools:        List[Tool[F, ?]],
-    resources:    List[McpSchema.ResourceHandler[F]],
+    resources:    List[ResourceHandler[F]],
     prompts:      List[McpSchema.PromptHandler[F]],
     transport:    McpTransport[F]
   ) extends McpServer[F]:
@@ -57,7 +58,7 @@ object McpServer:
     override def addTool[T](tool: Tool[F, T]): McpServer[F] =
       this.copy(tools = tools :+ tool)
 
-    override def addResource(resource: McpSchema.ResourceHandler[F]): McpServer[F] =
+    override def addResource(resource: ResourceHandler[F]): McpServer[F] =
       this.copy(resources = resources :+ resource)
 
     override def addPrompt(prompt: McpSchema.PromptHandler[F]): McpServer[F] =
@@ -76,7 +77,7 @@ object McpServer:
     serverInfo:   Implementation,
     capabilities: ServerCapabilities,
     tools:        List[Tool[F, ?]],
-    resources:    List[McpSchema.ResourceHandler[F]],
+    resources:    List[ResourceHandler[F]],
     prompts:      List[McpSchema.PromptHandler[F]],
     handlers:     Map[Method, RequestHandler[F]]
   ):
@@ -92,7 +93,7 @@ object McpServer:
     def addTool[T](tool: Tool[F, T]): FastMcp[F] =
       this.copy(tools = tools :+ tool)
 
-    def addResource(resource: McpSchema.ResourceHandler[F]): FastMcp[F] =
+    def addResource(resource: ResourceHandler[F]): FastMcp[F] =
       this.copy(resources = resources :+ resource)
 
     def addPrompt(prompt: McpSchema.PromptHandler[F]): FastMcp[F] =
