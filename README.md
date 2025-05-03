@@ -8,22 +8,19 @@
 ```scala 3
 import io.circe.*
 import mcp.schema.*
-import mcp.server.McpServer
 
 object StdioServer extends IOApp.Simple:
   
   case class Input(
     @Description("description for argument") argument: String
-  ) derives JsonSchema
-  object Input:
-    given Decoder[Input] = Decoder.derived[Input]
+  ) derives JsonSchema, Decoder
 
-  private val tool = McpSchema.Tool[IO, Input](
+  private val tool = Tool[IO, Input](
     "Tool Name",
     "Tool Description",
     request => IO(
-      McpSchema.CallToolResult.success(
-        McpSchema.Content.text(s"Hello ${request.argument}") :: Nil
+      CallToolResult.success(
+        Content.text(s"Hello ${request.argument}") :: Nil
       )
     )
   )
