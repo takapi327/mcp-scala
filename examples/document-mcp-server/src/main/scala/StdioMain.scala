@@ -63,7 +63,7 @@ object StdioMain extends IOApp.Simple:
     "Code Review",
     "Please review the code and provide feedback.",
     List(
-      McpSchema.PromptArgument(
+      PromptArgument(
         "code",
         "The code to review",
         true

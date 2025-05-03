@@ -45,39 +45,6 @@ object McpSchema:
 
 
 
-  /**
-   * Sent from the client to request resources/updated notifications from the server
-   * whenever a particular resource changes.
-   *
-   * @param uri the URI of the resource to subscribe to. The URI can use any protocol;
-   *            it is up to the server how to interpret it.
-   */
-  final case class SubscribeRequest(uri: String)
-  object SubscribeRequest:
-    given Decoder[SubscribeRequest] = Decoder.derived[SubscribeRequest]
-    given Encoder[SubscribeRequest] = Encoder.derived[SubscribeRequest]
-
-  final case class UnsubscribeRequest(uri: String)
-  object UnsubscribeRequest:
-    given Decoder[UnsubscribeRequest] = Decoder.derived[UnsubscribeRequest]
-    given Encoder[UnsubscribeRequest] = Encoder.derived[UnsubscribeRequest]
-
-  /**
-   * Describes an argument that a prompt can accept.
-   *
-   * @param name        The name of the argument.
-   * @param description A human-readable description of the argument.
-   * @param required    Whether this argument must be provided.
-   */
-  final case class PromptArgument(
-    name:        String,
-    description: String,
-    required:    Boolean
-  )
-  object PromptArgument:
-    given Decoder[PromptArgument] = Decoder.derived[PromptArgument]
-    given Encoder[PromptArgument] = Encoder.derived[PromptArgument]
-
   // ---------------------------
   // Prompt Interfaces
   // ---------------------------
