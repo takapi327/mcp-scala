@@ -23,11 +23,6 @@ import mcp.schema.result.*
 object McpSchema:
 
 
-  final case class ToolCapabilities(listChanged: Boolean)
-  object ToolCapabilities:
-    given Decoder[ToolCapabilities] = Decoder.derived[ToolCapabilities]
-    given Encoder[ToolCapabilities] = Encoder.derived[ToolCapabilities]
-
   final case class ServerCapabilities(
     // experimental: Option[Map[String, Json]],
     // logging: LoggingCapabilities,
